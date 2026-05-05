@@ -1,5 +1,5 @@
 {
-  "version": "1.0",
+  "version": "2.0",
   "description": "K-SpamGuard 탐지 엔진 평가 데이터셋. 정규화 파이프라인과 룰 엔진의 기준 검증에 사용한다.",
   "target_metrics": {
     "precision": 0.90,
@@ -7,995 +7,895 @@
   },
   "stats": {
     "total": 80,
-    "spam": 30,
-    "ham": 30,
-    "ambiguous": 20
+    "SPAM": 30,
+    "SAFE": 30,
+    "SUSPECT": 20
   },
   "label_definitions": {
-    "spam": "탐지 엔진이 SPAM으로 분류해야 하는 댓글",
-    "ham": "탐지 엔진이 HAM으로 분류해야 하는 댓글",
-    "ambiguous": "사람이 검수해야 하는 UNCERTAIN 댓글"
+    "SPAM": "탐지 엔진이 SPAM으로 분류해야 하는 댓글",
+    "SAFE": "탐지 엔진이 SAFE로 분류해야 하는 정상 댓글",
+    "SUSPECT": "키워드 매칭은 있으나 문맥상 판단이 필요한 댓글 — 사람 검수 대상"
   },
   "samples": [
     {
-      "id": 1,
+      "id": "KR-GAMBLING-001",
       "text": "카·지·노 입금 없이 3만원 공짜 지급! 카카오 ID: abc123",
-      "label": "spam",
+      "expected_status": "SPAM",
       "category": "gambling",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram gambling/part-time scam reports",
       "evasion_techniques": ["special_char_insertion"],
-      "expected_detection": {
-        "label": "SPAM",
-        "matched_categories": ["gambling", "contact_info"]
-      },
+      "matched_categories": ["gambling", "contact_info"],
       "notes": "카·지·노 형태로 점 삽입. 정규화 후 '카지노' 매칭. 카카오 ID 패턴 추가 매칭."
     },
     {
-      "id": 2,
+      "id": "KR-GAMBLING-002",
       "text": "ㄷㅂ사이트 추천🎰 지금 바로 가입하면 보너스 지급해요!",
-      "label": "spam",
+      "expected_status": "SPAM",
       "category": "gambling",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram gambling/part-time scam reports",
       "evasion_techniques": ["initial_consonant_only"],
-      "expected_detection": {
-        "label": "SPAM",
-        "matched_categories": ["gambling"]
-      },
+      "matched_categories": ["gambling"],
       "notes": "ㄷㅂ = 도박 초성. 이모지 혼입으로 시각적 은폐."
     },
     {
-      "id": 3,
+      "id": "KR-GAMBLING-003",
       "text": "🎰💰바카라 필승법 공개 bit.ly/xxxwin 팔로우 후 DM 주세요",
-      "label": "spam",
+      "expected_status": "SPAM",
       "category": "gambling",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram gambling/part-time scam reports",
       "evasion_techniques": ["emoji_insertion", "url_shortener"],
-      "expected_detection": {
-        "label": "SPAM",
-        "matched_categories": ["gambling", "url_spam"]
-      },
+      "matched_categories": ["gambling", "url_spam"],
       "notes": "바카라 키워드 + bit.ly 단축 URL + DM 유도. 세 패턴 동시 매칭."
     },
     {
-      "id": 4,
+      "id": "KR-GAMBLING-004",
       "text": "카지0 추천 5만원 무료 지급 텔레그램 t.me/casino_kr 가입",
-      "label": "spam",
+      "expected_status": "SPAM",
       "category": "gambling",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram gambling/part-time scam reports",
       "evasion_techniques": ["number_substitution", "url_shortener"],
-      "expected_detection": {
-        "label": "SPAM",
-        "matched_categories": ["gambling", "url_spam"]
-      },
+      "matched_categories": ["gambling", "url_spam"],
       "notes": "카지0 = 카지오 (숫자 0 → o). t.me 텔레그램 링크."
     },
     {
-      "id": 5,
+      "id": "KR-GAMBLING-005",
       "text": "Ｃａｓｉｎｏ온라인 최고 배당 지금 가입시 3만원 즉시 지급",
-      "label": "spam",
+      "expected_status": "SPAM",
       "category": "gambling",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram gambling/part-time scam reports",
       "evasion_techniques": ["fullwidth_characters"],
-      "expected_detection": {
-        "label": "SPAM",
-        "matched_categories": ["gambling"]
-      },
+      "matched_categories": ["gambling"],
       "notes": "전각 영문자 Ｃａｓｉｎｏ. NFKC 정규화 후 'Casino온라인' 매칭."
     },
     {
-      "id": 6,
+      "id": "KR-GAMBLING-006",
       "text": "스포츠토토 예측 적중률 95%✅ 오픈채팅 ow.ly/sp0rts 참여",
-      "label": "spam",
+      "expected_status": "SPAM",
       "category": "gambling",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram gambling/part-time scam reports",
       "evasion_techniques": ["url_shortener", "emoji_insertion"],
-      "expected_detection": {
-        "label": "SPAM",
-        "matched_categories": ["gambling", "url_spam"]
-      },
+      "matched_categories": ["gambling", "url_spam"],
       "notes": "토토 키워드 + ow.ly 단축 URL."
     },
     {
-      "id": 7,
+      "id": "KR-GAMBLING-007",
       "text": "🎯ㅂㅋㄹ 추천코드 입력하면 5만 포인트 지급! 지금 DM 주세요",
-      "label": "spam",
+      "expected_status": "SPAM",
       "category": "gambling",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram gambling/part-time scam reports",
       "evasion_techniques": ["initial_consonant_only", "emoji_insertion"],
-      "expected_detection": {
-        "label": "SPAM",
-        "matched_categories": ["gambling"]
-      },
+      "matched_categories": ["gambling"],
       "notes": "ㅂㅋㄹ = 바카라 초성."
     },
     {
-      "id": 8,
+      "id": "KR-GAMBLING-008",
       "text": "온라인카지노 Ｖ.Ｉ.Ｐ 초대 텔레그램 아이디 남겨주시면 연락드릴게요",
-      "label": "spam",
+      "expected_status": "SPAM",
       "category": "gambling",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram gambling/part-time scam reports",
       "evasion_techniques": ["fullwidth_characters", "special_char_insertion"],
-      "expected_detection": {
-        "label": "SPAM",
-        "matched_categories": ["gambling"]
-      },
+      "matched_categories": ["gambling"],
       "notes": "전각 VIP + 특수문자 점 삽입."
     },
     {
-      "id": 9,
+      "id": "KR-GAMBLING-009",
       "text": "🃏포커 블랙잭 바카라 가입만해도 1만포인트🎰 지금 t.me/card_game_kr",
-      "label": "spam",
+      "expected_status": "SPAM",
       "category": "gambling",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram gambling/part-time scam reports",
       "evasion_techniques": ["emoji_insertion", "url_shortener"],
-      "expected_detection": {
-        "label": "SPAM",
-        "matched_categories": ["gambling", "url_spam"]
-      },
+      "matched_categories": ["gambling", "url_spam"],
       "notes": "포커/블랙잭/바카라 복수 키워드 + 텔레그램 링크."
     },
     {
-      "id": 10,
+      "id": "KR-GAMBLING-010",
       "text": "로또 당첨번호 예측 100% 전문가 분석 bit.ly/lotto_win_kr",
-      "label": "spam",
+      "expected_status": "SPAM",
       "category": "gambling",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram gambling/part-time scam reports",
       "evasion_techniques": ["url_shortener"],
-      "expected_detection": {
-        "label": "SPAM",
-        "matched_categories": ["gambling", "url_spam"]
-      },
+      "matched_categories": ["gambling", "url_spam"],
       "notes": "로또 예측 사기 + 단축 URL."
     },
     {
-      "id": 11,
+      "id": "KR-LOAN-001",
       "text": "대.출 필요하세요? 무직자도 당일 승인 가능 카카0 ID: loan123",
-      "label": "spam",
+      "expected_status": "SPAM",
       "category": "loan",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram loan scam reports",
       "evasion_techniques": ["special_char_insertion", "number_substitution"],
-      "expected_detection": {
-        "label": "SPAM",
-        "matched_categories": ["loan", "contact_info"]
-      },
+      "matched_categories": ["loan", "contact_info"],
       "notes": "대.출 (점 삽입) + 카카0 (숫자 치환). 두 기법 동시 사용."
     },
     {
-      "id": 12,
+      "id": "KR-LOAN-002",
       "text": "💳신용불량자도 가능✅ 당일지급 24시간 상담 카카오톡으로 오세요",
-      "label": "spam",
+      "expected_status": "SPAM",
       "category": "loan",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram loan scam reports",
       "evasion_techniques": ["emoji_insertion"],
-      "expected_detection": {
-        "label": "SPAM",
-        "matched_categories": ["loan"]
-      },
+      "matched_categories": ["loan"],
       "notes": "신용불량자 + 당일지급 키워드. 이모지로 시각적 분리."
     },
     {
-      "id": 13,
+      "id": "KR-LOAN-003",
       "text": "ㄷㅊ필요하신분 연락주세요 금리 최저 1% 보장 연락처 010-xxxx",
-      "label": "spam",
+      "expected_status": "SPAM",
       "category": "loan",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram loan scam reports",
       "evasion_techniques": ["initial_consonant_only"],
-      "expected_detection": {
-        "label": "SPAM",
-        "matched_categories": ["loan", "contact_info"]
-      },
+      "matched_categories": ["loan", "contact_info"],
       "notes": "ㄷㅊ = 대출 초성. 전화번호 패턴 추가 매칭."
     },
     {
-      "id": 14,
+      "id": "KR-LOAN-004",
       "text": "급전 필요하세요? 10분 안에 해결 → bit.ly/quickloan",
-      "label": "spam",
+      "expected_status": "SPAM",
       "category": "loan",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram loan scam reports",
       "evasion_techniques": ["url_shortener"],
-      "expected_detection": {
-        "label": "SPAM",
-        "matched_categories": ["loan", "url_spam"]
-      },
+      "matched_categories": ["loan", "url_spam"],
       "notes": "급전 키워드 + bit.ly."
     },
     {
-      "id": 15,
+      "id": "KR-LOAN-005",
       "text": "5·0·0만원 당일지급 신불자OK 24시간 상담 01012345678",
-      "label": "spam",
+      "expected_status": "SPAM",
       "category": "loan",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram loan scam reports",
       "evasion_techniques": ["special_char_insertion"],
-      "expected_detection": {
-        "label": "SPAM",
-        "matched_categories": ["loan", "contact_info"]
-      },
+      "matched_categories": ["loan", "contact_info"],
       "notes": "5·0·0만원 (특수문자 삽입) + 전화번호 패턴."
     },
     {
-      "id": 16,
+      "id": "KR-LOAN-006",
       "text": "ＤＭ주시면 대출 안내해드려요 신용점수 무관 당일가능",
-      "label": "spam",
+      "expected_status": "SPAM",
       "category": "loan",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram loan scam reports",
       "evasion_techniques": ["fullwidth_characters"],
-      "expected_detection": {
-        "label": "SPAM",
-        "matched_categories": ["loan"]
-      },
+      "matched_categories": ["loan"],
       "notes": "전각 ＤＭ. 대출+당일+신용점수 무관 복합 키워드."
     },
     {
-      "id": 17,
+      "id": "KR-ADULT-001",
       "text": "🔞성인영상 무료 제공💋 팔로우하고 DM 주세요~",
-      "label": "spam",
+      "expected_status": "SPAM",
       "category": "adult",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram adult content scam reports",
       "evasion_techniques": ["emoji_insertion"],
-      "expected_detection": {
-        "label": "SPAM",
-        "matched_categories": ["adult"]
-      },
+      "matched_categories": ["adult"],
       "notes": "🔞 성인 이모지 + 성인영상 키워드."
     },
     {
-      "id": 18,
+      "id": "KR-ADULT-002",
       "text": "야.동 무.료 공.유 텔레그램 t.me/adult_channel",
-      "label": "spam",
+      "expected_status": "SPAM",
       "category": "adult",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram adult content scam reports",
       "evasion_techniques": ["special_char_insertion", "url_shortener"],
-      "expected_detection": {
-        "label": "SPAM",
-        "matched_categories": ["adult", "url_spam"]
-      },
+      "matched_categories": ["adult", "url_spam"],
       "notes": "야.동 (점 삽입). 정규화 후 '야동' 매칭."
     },
     {
-      "id": 19,
+      "id": "KR-ADULT-003",
       "text": "0nlyfan5 콘텐츠 공유해요 DM 주시면 링크 드려요",
-      "label": "spam",
+      "expected_status": "SPAM",
       "category": "adult",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram adult content scam reports",
       "evasion_techniques": ["number_substitution"],
-      "expected_detection": {
-        "label": "SPAM",
-        "matched_categories": ["adult"]
-      },
+      "matched_categories": ["adult"],
       "notes": "0nlyfan5 = OnlyFans. 숫자로 o→0, s→5 치환."
     },
     {
-      "id": 20,
+      "id": "KR-ADULT-004",
       "text": "❤️‍🔥성인화상채팅 지금 무료 t.me/livechat18",
-      "label": "spam",
+      "expected_status": "SPAM",
       "category": "adult",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram adult content scam reports",
       "evasion_techniques": ["emoji_insertion", "url_shortener"],
-      "expected_detection": {
-        "label": "SPAM",
-        "matched_categories": ["adult", "url_spam"]
-      },
+      "matched_categories": ["adult", "url_spam"],
       "notes": "성인화상채팅 키워드 + 텔레그램."
     },
     {
-      "id": 21,
+      "id": "KR-PHISHING-001",
       "text": "축하합니다! 100만원 당첨🎉 수령하러 → http://fake-prize.kr/claim",
-      "label": "spam",
+      "expected_status": "SPAM",
       "category": "phishing",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram phishing reports",
       "evasion_techniques": ["emoji_insertion"],
-      "expected_detection": {
-        "label": "SPAM",
-        "matched_categories": ["phishing", "url_spam"]
-      },
+      "matched_categories": ["phishing", "url_spam"],
       "notes": "경품 당첨 피싱. 외부 URL + 당첨 사기 패턴."
     },
     {
-      "id": 22,
+      "id": "KR-PHISHING-002",
       "text": "⚠️인스타계정 해킹위험✅ 지금 바로 확인하세요 → bit.ly/ig-security",
-      "label": "spam",
+      "expected_status": "SPAM",
       "category": "phishing",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram phishing reports",
       "evasion_techniques": ["emoji_insertion", "url_shortener"],
-      "expected_detection": {
-        "label": "SPAM",
-        "matched_categories": ["phishing", "url_spam"]
-      },
+      "matched_categories": ["phishing", "url_spam"],
       "notes": "계정 보안 위협 피싱. '해킹위험' + 단축 URL."
     },
     {
-      "id": 23,
+      "id": "KR-PHISHING-003",
       "text": "당신의 인스타가 해킹될 위험이 있습니다 이 링크에서 확인 → bit.ly/verify-ig",
-      "label": "spam",
+      "expected_status": "SPAM",
       "category": "phishing",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram phishing reports",
       "evasion_techniques": ["url_shortener"],
-      "expected_detection": {
-        "label": "SPAM",
-        "matched_categories": ["phishing", "url_spam"]
-      },
+      "matched_categories": ["phishing", "url_spam"],
       "notes": "계정 탈취 피싱 URL."
     },
     {
-      "id": 24,
+      "id": "KR-PHISHING-004",
       "text": "이 게시물 좋아요 누르면 아이폰16 추첨 참여! → link.bio/iphone-event",
-      "label": "spam",
+      "expected_status": "SPAM",
       "category": "phishing",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram phishing reports",
       "evasion_techniques": ["url_shortener"],
-      "expected_detection": {
-        "label": "SPAM",
-        "matched_categories": ["phishing", "url_spam"]
-      },
+      "matched_categories": ["phishing", "url_spam"],
       "notes": "가짜 경품 이벤트 피싱."
     },
     {
-      "id": 25,
+      "id": "KR-PHISHING-005",
       "text": "구독자 감사이벤트🎁 선착순 10명 백화점 상품권 5만원 → bit.ly/dept-gift",
-      "label": "spam",
+      "expected_status": "SPAM",
       "category": "phishing",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram phishing reports",
       "evasion_techniques": ["emoji_insertion", "url_shortener"],
-      "expected_detection": {
-        "label": "SPAM",
-        "matched_categories": ["phishing", "url_spam"]
-      },
+      "matched_categories": ["phishing", "url_spam"],
       "notes": "가짜 사은행사 피싱."
     },
     {
-      "id": 26,
+      "id": "KR-PARTTIME-001",
       "text": "✅재택근무 하루 5만원💰 초보도 가능 DM 주세요!",
-      "label": "spam",
+      "expected_status": "SPAM",
       "category": "parttime_scam",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram gambling/part-time scam reports",
       "evasion_techniques": ["emoji_insertion"],
-      "expected_detection": {
-        "label": "SPAM",
-        "matched_categories": ["parttime_scam"]
-      },
+      "matched_categories": ["parttime_scam"],
       "notes": "재택근무 사기. '하루 N만원' + 'DM 주세요' 패턴."
     },
     {
-      "id": 27,
+      "id": "KR-PARTTIME-002",
       "text": "부·업 월300만원 보장 인증 가능 카카오 문의 주세요",
-      "label": "spam",
+      "expected_status": "SPAM",
       "category": "parttime_scam",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram gambling/part-time scam reports",
       "evasion_techniques": ["special_char_insertion"],
-      "expected_detection": {
-        "label": "SPAM",
-        "matched_categories": ["parttime_scam"]
-      },
+      "matched_categories": ["parttime_scam"],
       "notes": "부·업 (특수문자 삽입). '월N만원 보장' 패턴."
     },
     {
-      "id": 28,
+      "id": "KR-PARTTIME-003",
       "text": "하루 1시간 2만원 가능! 재택알바 카카오 ID: work4u",
-      "label": "spam",
+      "expected_status": "SPAM",
       "category": "parttime_scam",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram gambling/part-time scam reports",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "SPAM",
-        "matched_categories": ["parttime_scam", "contact_info"]
-      },
+      "matched_categories": ["parttime_scam", "contact_info"],
       "notes": "변형 없음. '재택알바 + 시급 보장 + 카카오 ID' 복합 패턴."
     },
     {
-      "id": 29,
+      "id": "KR-FOLLOWER-001",
       "text": "팔로워 1000명 5천원💎 좋아요 구매 DM 문의",
-      "label": "spam",
+      "expected_status": "SPAM",
       "category": "follower_buy",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram follower/like purchase scam reports",
       "evasion_techniques": ["emoji_insertion"],
-      "expected_detection": {
-        "label": "SPAM",
-        "matched_categories": ["follower_buy"]
-      },
+      "matched_categories": ["follower_buy"],
       "notes": "팔로워/좋아요 판매 스팸."
     },
     {
-      "id": 30,
+      "id": "KR-FOLLOWER-002",
       "text": "좋아요 100개에 2000원 팔로워 맞팔 서비스 DM 문의 가능",
-      "label": "spam",
+      "expected_status": "SPAM",
       "category": "follower_buy",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram follower/like purchase scam reports",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "SPAM",
-        "matched_categories": ["follower_buy"]
-      },
+      "matched_categories": ["follower_buy"],
       "notes": "좋아요/팔로워 판매 + 가격 명시."
     },
     {
-      "id": 31,
+      "id": "KR-SAFE-001",
       "text": "사진 너무 예뻐요 ❤️",
-      "label": "ham",
+      "expected_status": "SAFE",
       "category": "compliment",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram normal engagement comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "HAM",
-        "matched_categories": []
-      },
+      "matched_categories": [],
       "notes": "단순 칭찬. 이모지는 감정 표현 목적."
     },
     {
-      "id": 32,
+      "id": "KR-SAFE-002",
       "text": "어디 카페예요? 저도 가보고 싶어요!",
-      "label": "ham",
+      "expected_status": "SAFE",
       "category": "question",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram normal engagement comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "HAM",
-        "matched_categories": []
-      },
+      "matched_categories": [],
       "notes": "순수 질문 댓글."
     },
     {
-      "id": 33,
+      "id": "KR-SAFE-003",
       "text": "레시피 공유해주셔서 감사합니다~ 따라해봤는데 맛있었어요 😊",
-      "label": "ham",
+      "expected_status": "SAFE",
       "category": "compliment",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram normal engagement comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "HAM",
-        "matched_categories": []
-      },
+      "matched_categories": [],
       "notes": "경험 공유 댓글."
     },
     {
-      "id": 34,
+      "id": "KR-SAFE-004",
       "text": "언니 이 립스틱 뭐예요? 색이 너무 이쁜데 알려주세요",
-      "label": "ham",
+      "expected_status": "SAFE",
       "category": "question",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram normal engagement comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "HAM",
-        "matched_categories": []
-      },
+      "matched_categories": [],
       "notes": "제품 문의 댓글."
     },
     {
-      "id": 35,
+      "id": "KR-SAFE-005",
       "text": "진짜 대박이다 ㅋㅋㅋㅋ 매일 기다려져요",
-      "label": "ham",
+      "expected_status": "SAFE",
       "category": "engagement",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram normal engagement comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "HAM",
-        "matched_categories": []
-      },
+      "matched_categories": [],
       "notes": "진성 팬 반응."
     },
     {
-      "id": 36,
+      "id": "KR-SAFE-006",
       "text": "이런 콘텐츠 너무 좋아요!! 계속 해주세요 🙏",
-      "label": "ham",
+      "expected_status": "SAFE",
       "category": "engagement",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram normal engagement comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "HAM",
-        "matched_categories": []
-      },
+      "matched_categories": [],
       "notes": "콘텐츠 응원 댓글."
     },
     {
-      "id": 37,
+      "id": "KR-SAFE-007",
       "text": "어떤 카메라로 찍으세요? 화질이 너무 좋아요",
-      "label": "ham",
+      "expected_status": "SAFE",
       "category": "question",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram normal engagement comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "HAM",
-        "matched_categories": []
-      },
+      "matched_categories": [],
       "notes": "장비 관련 질문."
     },
     {
-      "id": 38,
+      "id": "KR-SAFE-008",
       "text": "오늘 뭐 입으셨어요? 코디 알려주세요!",
-      "label": "ham",
+      "expected_status": "SAFE",
       "category": "question",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram normal engagement comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "HAM",
-        "matched_categories": []
-      },
+      "matched_categories": [],
       "notes": "패션 관련 질문."
     },
     {
-      "id": 39,
+      "id": "KR-SAFE-009",
       "text": "저도 같은 고민하고 있었는데 도움이 됐어요 감사합니다",
-      "label": "ham",
+      "expected_status": "SAFE",
       "category": "compliment",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram normal engagement comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "HAM",
-        "matched_categories": []
-      },
+      "matched_categories": [],
       "notes": "공감 댓글."
     },
     {
-      "id": 40,
+      "id": "KR-SAFE-010",
       "text": "헐 진짜요?? 저도 해봐야겠다",
-      "label": "ham",
+      "expected_status": "SAFE",
       "category": "engagement",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram normal engagement comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "HAM",
-        "matched_categories": []
-      },
+      "matched_categories": [],
       "notes": "자연스러운 반응."
     },
     {
-      "id": 41,
+      "id": "KR-SAFE-011",
       "text": "팔로우 했어요! 앞으로도 자주 올라오길 바랄게요 😊",
-      "label": "ham",
+      "expected_status": "SAFE",
       "category": "engagement",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram normal engagement comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "HAM",
-        "matched_categories": []
-      },
+      "matched_categories": [],
       "notes": "팔로우 알림 댓글. 팔로워 '구매'가 아닌 자발적 팔로우."
     },
     {
-      "id": 42,
+      "id": "KR-SAFE-012",
       "text": "저도 써봤는데 완전 강추예요~ 다들 써보세요",
-      "label": "ham",
+      "expected_status": "SAFE",
       "category": "recommendation",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram normal engagement comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "HAM",
-        "matched_categories": []
-      },
+      "matched_categories": [],
       "notes": "제품 추천. URL 없는 순수 추천."
     },
     {
-      "id": 43,
+      "id": "KR-SAFE-013",
       "text": "드디어 신제품 나왔네요!! 기다렸어요",
-      "label": "ham",
+      "expected_status": "SAFE",
       "category": "engagement",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram normal engagement comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "HAM",
-        "matched_categories": []
-      },
+      "matched_categories": [],
       "notes": "신제품 기대 댓글."
     },
     {
-      "id": 44,
+      "id": "KR-SAFE-014",
       "text": "이거 어디서 샀어요? 저도 갖고 싶어요",
-      "label": "ham",
+      "expected_status": "SAFE",
       "category": "question",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram normal engagement comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "HAM",
-        "matched_categories": []
-      },
+      "matched_categories": [],
       "notes": "구매처 질문."
     },
     {
-      "id": 45,
+      "id": "KR-SAFE-015",
       "text": "완전 공감이에요 맞아요 맞아요 ㅠㅠ",
-      "label": "ham",
+      "expected_status": "SAFE",
       "category": "engagement",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram normal engagement comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "HAM",
-        "matched_categories": []
-      },
+      "matched_categories": [],
       "notes": "공감 반응."
     },
     {
-      "id": 46,
+      "id": "KR-SAFE-016",
       "text": "다음에 이런 내용도 올려주세요! 기대할게요",
-      "label": "ham",
+      "expected_status": "SAFE",
       "category": "engagement",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram normal engagement comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "HAM",
-        "matched_categories": []
-      },
+      "matched_categories": [],
       "notes": "콘텐츠 요청."
     },
     {
-      "id": 47,
+      "id": "KR-SAFE-017",
       "text": "항상 응원합니다 화이팅! 💪",
-      "label": "ham",
+      "expected_status": "SAFE",
       "category": "compliment",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram normal engagement comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "HAM",
-        "matched_categories": []
-      },
+      "matched_categories": [],
       "notes": "응원 댓글."
     },
     {
-      "id": 48,
+      "id": "KR-SAFE-018",
       "text": "와 진짜 맛있겠다 지금 배고픈데 ㅠㅠ",
-      "label": "ham",
+      "expected_status": "SAFE",
       "category": "engagement",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram normal engagement comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "HAM",
-        "matched_categories": []
-      },
+      "matched_categories": [],
       "notes": "음식 게시물 자연스러운 반응."
     },
     {
-      "id": 49,
+      "id": "KR-SAFE-019",
       "text": "저 여기 가봤어요! 진짜 좋았어요 강추 🙌",
-      "label": "ham",
+      "expected_status": "SAFE",
       "category": "recommendation",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram normal engagement comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "HAM",
-        "matched_categories": []
-      },
+      "matched_categories": [],
       "notes": "장소 추천. URL 없음."
     },
     {
-      "id": 50,
+      "id": "KR-SAFE-020",
       "text": "이런 꿀팁 너무 감사해요 바로 적용해볼게요",
-      "label": "ham",
+      "expected_status": "SAFE",
       "category": "compliment",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram normal engagement comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "HAM",
-        "matched_categories": []
-      },
+      "matched_categories": [],
       "notes": "정보성 콘텐츠 감사 댓글."
     },
     {
-      "id": 51,
+      "id": "KR-SAFE-021",
       "text": "솔직한 리뷰 너무 좋아요 다른 유튜버들처럼 광고만 안 해서 믿어져요",
-      "label": "ham",
+      "expected_status": "SAFE",
       "category": "compliment",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram normal engagement comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "HAM",
-        "matched_categories": []
-      },
+      "matched_categories": [],
       "notes": "'광고' 단어 포함되나 부정적 문맥. 오탐 테스트 케이스."
     },
     {
-      "id": 52,
+      "id": "KR-SAFE-022",
       "text": "저 지난번 거 따라 했더니 완전 성공했어요!! 감사합니다",
-      "label": "ham",
+      "expected_status": "SAFE",
       "category": "compliment",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram normal engagement comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "HAM",
-        "matched_categories": []
-      },
+      "matched_categories": [],
       "notes": "성공 경험 공유."
     },
     {
-      "id": 53,
+      "id": "KR-SAFE-023",
       "text": "오늘 영상 최고였어요 다음편도 빨리요!!",
-      "label": "ham",
+      "expected_status": "SAFE",
       "category": "engagement",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram normal engagement comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "HAM",
-        "matched_categories": []
-      },
+      "matched_categories": [],
       "notes": "영상 콘텐츠 반응."
     },
     {
-      "id": 54,
+      "id": "KR-SAFE-024",
       "text": "진짜 열심히 하시는 거 느껴져요 존경해요",
-      "label": "ham",
+      "expected_status": "SAFE",
       "category": "compliment",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram normal engagement comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "HAM",
-        "matched_categories": []
-      },
+      "matched_categories": [],
       "notes": "크리에이터 응원."
     },
     {
-      "id": 55,
+      "id": "KR-SAFE-025",
       "text": "이 브랜드 저도 애용하는데 좋죠? ㅎㅎ",
-      "label": "ham",
+      "expected_status": "SAFE",
       "category": "engagement",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram normal engagement comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "HAM",
-        "matched_categories": []
-      },
+      "matched_categories": [],
       "notes": "공감 댓글."
     },
     {
-      "id": 56,
+      "id": "KR-SAFE-026",
       "text": "얼마예요? 직구 가능한가요?",
-      "label": "ham",
+      "expected_status": "SAFE",
       "category": "question",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram normal engagement comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "HAM",
-        "matched_categories": []
-      },
+      "matched_categories": [],
       "notes": "구매 문의. '직구' 단어 포함이나 일반 질문."
     },
     {
-      "id": 57,
+      "id": "KR-SAFE-027",
       "text": "사진 구도가 완벽해요 역시 다르네",
-      "label": "ham",
+      "expected_status": "SAFE",
       "category": "compliment",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram normal engagement comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "HAM",
-        "matched_categories": []
-      },
+      "matched_categories": [],
       "notes": "기술적 칭찬."
     },
     {
-      "id": 58,
+      "id": "KR-SAFE-028",
       "text": "다음에 이거 만드는 법도 알려주세요!",
-      "label": "ham",
+      "expected_status": "SAFE",
       "category": "question",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram normal engagement comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "HAM",
-        "matched_categories": []
-      },
+      "matched_categories": [],
       "notes": "레시피/튜토리얼 요청."
     },
     {
-      "id": 59,
+      "id": "KR-SAFE-029",
       "text": "이거 색이 너무 예뻐서 저도 하나 사야겠어요 ㅠ",
-      "label": "ham",
+      "expected_status": "SAFE",
       "category": "engagement",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram normal engagement comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "HAM",
-        "matched_categories": []
-      },
+      "matched_categories": [],
       "notes": "구매 의향 댓글."
     },
     {
-      "id": 60,
+      "id": "KR-SAFE-030",
       "text": "와 여기 저번에 가봤는데 분위기 진짜 좋더라고요 ✨",
-      "label": "ham",
+      "expected_status": "SAFE",
       "category": "recommendation",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram normal engagement comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "HAM",
-        "matched_categories": []
-      },
+      "matched_categories": [],
       "notes": "장소 경험 공유."
     },
     {
-      "id": 61,
+      "id": "KR-SUSPECT-001",
       "text": "비즈니스 문의는 DM으로 부탁드립니다 📩",
-      "label": "ambiguous",
+      "expected_status": "SUSPECT",
       "category": "self_promotion",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram borderline commercial comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "UNCERTAIN",
-        "matched_categories": []
-      },
-      "ambiguous_reason": "크리에이터 본인의 비즈니스 문의 안내일 수 있음. DM 유도 패턴이 스팸 댓글에서도 사용됨.",
-      "notes": "계정 소유자인지 외부인인지 알 수 없으면 UNCERTAIN."
+      "matched_categories": [],
+      "notes": "크리에이터 본인의 비즈니스 문의 안내일 수 있음. DM 유도 패턴이 스팸 댓글에서도 사용됨. 계정 소유자인지 외부인인지 알 수 없으면 SUSPECT."
     },
     {
-      "id": 62,
+      "id": "KR-SUSPECT-002",
       "text": "제 블로그에 더 자세한 내용 올려뒀어요 → 프로필 링크 참고",
-      "label": "ambiguous",
+      "expected_status": "SUSPECT",
       "category": "self_promotion",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram borderline commercial comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "UNCERTAIN",
-        "matched_categories": ["url_reference"]
-      },
-      "ambiguous_reason": "URL은 없으나 외부 링크 유도. 관련 정보 공유일 수 있고 클릭 유도 스팸일 수 있음.",
-      "notes": "프로필 링크 유도. 트래픽 스팸 가능성."
+      "matched_categories": ["url_reference"],
+      "notes": "URL은 없으나 외부 링크 유도. 관련 정보 공유일 수 있고 클릭 유도 스팸일 수 있음. 프로필 링크 트래픽 스팸 가능성."
     },
     {
-      "id": 63,
+      "id": "KR-SUSPECT-003",
       "text": "저 팔로우 하시면 맞팔해요 💕",
-      "label": "ambiguous",
+      "expected_status": "SUSPECT",
       "category": "follow_request",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram borderline commercial comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "UNCERTAIN",
-        "matched_categories": []
-      },
-      "ambiguous_reason": "팔로워 구매 스팸과는 다르게 상호 팔로우 요청. 저품질 댓글이나 악의적 스팸 아닐 수 있음.",
-      "notes": "팔로워 판매('팔로워 N명 N원')와 구분 필요."
+      "matched_categories": [],
+      "notes": "팔로워 구매 스팸과는 다르게 상호 팔로우 요청. 저품질 댓글이나 악의적 스팸 아닐 수 있음. 팔로워 판매('팔로워 N명 N원')와 구분 필요."
     },
     {
-      "id": 64,
+      "id": "KR-SUSPECT-004",
       "text": "이 제품 저희 쇼핑몰에도 있어요! 가격 더 싸게 드릴 수 있어요",
-      "label": "ambiguous",
+      "expected_status": "SUSPECT",
       "category": "competitor_promotion",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram borderline commercial comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "UNCERTAIN",
-        "matched_categories": []
-      },
-      "ambiguous_reason": "경쟁사 홍보 댓글. 스팸에 가깝지만 합법적 광고일 수 있음. URL 없음.",
-      "notes": "URL 없어서 URL 스팸 패턴 미매칭. 쇼핑몰 언급으로 상업적 의도 추정."
+      "matched_categories": [],
+      "notes": "경쟁사 홍보 댓글. 스팸에 가깝지만 합법적 광고일 수 있음. URL 없어서 URL 스팸 패턴 미매칭."
     },
     {
-      "id": 65,
+      "id": "KR-SUSPECT-005",
       "text": "부업으로 한 달에 얼마나 버세요? 저도 부업 찾고 있는데",
-      "label": "ambiguous",
+      "expected_status": "SUSPECT",
       "category": "question",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram borderline commercial comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "UNCERTAIN",
-        "matched_categories": []
-      },
-      "ambiguous_reason": "'부업' 단어 포함이나 링크/연락처 없는 순수 질문일 수 있음. 스팸 봇의 초기 접근일 수도 있음.",
-      "notes": "부업 키워드 단독은 FP 위험. 연락처/URL 없으면 UNCERTAIN이 적절."
+      "matched_categories": [],
+      "notes": "'부업' 단어 포함이나 링크/연락처 없는 순수 질문일 수 있음. 스팸 봇의 초기 접근일 수도 있음. 연락처/URL 없으면 SUSPECT이 적절."
     },
     {
-      "id": 66,
+      "id": "KR-SUSPECT-006",
       "text": "합법 카지노 방문기 올린 채널인데 같이 성장해요!",
-      "label": "ambiguous",
+      "expected_status": "SUSPECT",
       "category": "self_promotion",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram borderline commercial comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "UNCERTAIN",
-        "matched_categories": ["gambling"]
-      },
-      "ambiguous_reason": "'카지노' 키워드 매칭되나 합법 오프라인 카지노(강원랜드 등) 방문기 콘텐츠일 수 있음.",
-      "notes": "키워드 단순 매칭의 FP 케이스. 문맥 해석 필요."
+      "matched_categories": ["gambling"],
+      "notes": "'카지노' 키워드 매칭되나 합법 오프라인 카지노(강원랜드 등) 방문기 콘텐츠일 수 있음. 키워드 단순 매칭의 FP 케이스."
     },
     {
-      "id": 67,
+      "id": "KR-SUSPECT-007",
       "text": "저도 비슷한 서비스 운영하는데 협업 어떠세요? DM 주세요",
-      "label": "ambiguous",
+      "expected_status": "SUSPECT",
       "category": "collaboration_request",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram borderline commercial comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "UNCERTAIN",
-        "matched_categories": []
-      },
-      "ambiguous_reason": "DM 유도 포함되나 진성 협업 제안일 수 있음. 스팸 패턴(가격/연락처)은 없음.",
-      "notes": "협업 DM 요청은 인플루언서에게 흔함."
+      "matched_categories": [],
+      "notes": "DM 유도 포함되나 진성 협업 제안일 수 있음. 스팸 패턴(가격/연락처)은 없음. 인플루언서에게 흔한 협업 DM 요청 패턴."
     },
     {
-      "id": 68,
+      "id": "KR-SUSPECT-008",
       "text": "실손보험 청구 잘 안 되시는 분 저한테 연락주세요 도와드려요",
-      "label": "ambiguous",
+      "expected_status": "SUSPECT",
       "category": "financial_service",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram borderline commercial comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "UNCERTAIN",
-        "matched_categories": ["contact_info"]
-      },
-      "ambiguous_reason": "보험 관련 서비스 홍보. 합법적 보험 설계사 영업일 수 있고 사기일 수 있음. 연락 유도 포함.",
-      "notes": "보험 도움 제안. 금융 관련이지만 대출 스팸과 다른 패턴."
+      "matched_categories": ["contact_info"],
+      "notes": "보험 관련 서비스 홍보. 합법적 보험 설계사 영업일 수 있고 사기일 수 있음. 금융 관련이지만 대출 스팸과 다른 패턴."
     },
     {
-      "id": 69,
+      "id": "KR-SUSPECT-009",
       "text": "요즘 주식/코인 관심 있으세요? 같이 공부해요!",
-      "label": "ambiguous",
+      "expected_status": "SUSPECT",
       "category": "investment",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram borderline commercial comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "UNCERTAIN",
-        "matched_categories": []
-      },
-      "ambiguous_reason": "투자 관심 유도. URL/연락처 없이 가입 유도 스팸의 첫 단계일 수 있음. 진성 투자 스터디일 수도.",
-      "notes": "코인/주식 키워드. 링크 없어서 단독으로는 탐지 어려움."
+      "matched_categories": [],
+      "notes": "투자 관심 유도. URL/연락처 없이 가입 유도 스팸의 첫 단계일 수 있음. 진성 투자 스터디일 수도. 링크 없어서 단독으로는 탐지 어려움."
     },
     {
-      "id": 70,
+      "id": "KR-SUSPECT-010",
       "text": "❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️",
-      "label": "ambiguous",
+      "expected_status": "SUSPECT",
       "category": "emoji_spam",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram borderline commercial comments",
       "evasion_techniques": ["emoji_insertion"],
-      "expected_detection": {
-        "label": "UNCERTAIN",
-        "matched_categories": []
-      },
-      "ambiguous_reason": "의미 없는 이모지 도배. 스팸봇 행동일 수 있으나 팬의 열정 표현일 수 있음. 텍스트 키워드 없음.",
-      "notes": "키워드 탐지 불가. 이모지 반복 횟수 기반 규칙 필요."
+      "matched_categories": [],
+      "notes": "의미 없는 이모지 도배. 스팸봇 행동일 수 있으나 팬의 열정 표현일 수 있음. 텍스트 키워드 없음. 이모지 반복 횟수 기반 규칙 필요."
     },
     {
-      "id": 71,
+      "id": "KR-SUSPECT-011",
       "text": "저 유료 클래스 오픈했어요~ 자세한 내용은 프로필 bio 확인해주세요",
-      "label": "ambiguous",
+      "expected_status": "SUSPECT",
       "category": "self_promotion",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram borderline commercial comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "UNCERTAIN",
-        "matched_categories": []
-      },
-      "ambiguous_reason": "유료 강의 홍보. 합법적 크리에이터 마케팅일 수 있으나 계정 성격에 따라 스팸으로 볼 수 있음.",
-      "notes": "URL 없어서 url_spam 미매칭. 상업적 홍보는 검수 필요."
+      "matched_categories": [],
+      "notes": "유료 강의 홍보. 합법적 크리에이터 마케팅일 수 있으나 계정 성격에 따라 스팸으로 볼 수 있음. URL 없어서 url_spam 미매칭."
     },
     {
-      "id": 72,
+      "id": "KR-SUSPECT-012",
       "text": "이거 아마존에서 더 싸게 살 수 있어요 링크는 제 프로필에",
-      "label": "ambiguous",
+      "expected_status": "SUSPECT",
       "category": "self_promotion",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram borderline commercial comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "UNCERTAIN",
-        "matched_categories": []
-      },
-      "ambiguous_reason": "외부 쇼핑 링크 유도. 실제로 더 싼 정보 제공일 수 있고 제휴마케팅 스팸일 수 있음.",
-      "notes": "프로필 링크 유도. 직접 URL 미포함."
+      "matched_categories": [],
+      "notes": "외부 쇼핑 링크 유도. 실제로 더 싼 정보 제공일 수 있고 제휴마케팅 스팸일 수 있음. 프로필 링크 유도, 직접 URL 미포함."
     },
     {
-      "id": 73,
+      "id": "KR-SUSPECT-013",
       "text": "글로벌 직구 대행해드려요 DM 문의 환영",
-      "label": "ambiguous",
+      "expected_status": "SUSPECT",
       "category": "commercial_service",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram borderline commercial comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "UNCERTAIN",
-        "matched_categories": []
-      },
-      "ambiguous_reason": "DM 유도 상업적 댓글. 실제 서비스 제공자일 수 있음. URL/가격 정보 없음.",
-      "notes": "직구 대행은 합법 서비스. 하지만 모든 댓글에 동일 내용 반복 시 스팸."
+      "matched_categories": [],
+      "notes": "DM 유도 상업적 댓글. 실제 서비스 제공자일 수 있음. URL/가격 정보 없음. 모든 댓글에 동일 내용 반복 시 스팸."
     },
     {
-      "id": 74,
+      "id": "KR-SUSPECT-014",
       "text": "요즘 다이어트 정말 힘드시죠? 저 10kg 빠진 방법 DM으로 알려드릴게요",
-      "label": "ambiguous",
+      "expected_status": "SUSPECT",
       "category": "health_promotion",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram borderline commercial comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "UNCERTAIN",
-        "matched_categories": []
-      },
-      "ambiguous_reason": "다이어트 DM 유도. 제품 판매 스팸이거나 진성 경험 공유일 수 있음. '10kg' 과장 수치 의심.",
-      "notes": "DM 유도 + 과장된 수치. 부업 스팸과 유사 패턴."
+      "matched_categories": [],
+      "notes": "다이어트 DM 유도. 제품 판매 스팸이거나 진성 경험 공유일 수 있음. DM 유도 + 과장된 수치. 부업 스팸과 유사 패턴."
     },
     {
-      "id": 75,
+      "id": "KR-SUSPECT-015",
       "text": "이것 관련해서 무료 상담해드려요 링크는 프로필에 있어요",
-      "label": "ambiguous",
+      "expected_status": "SUSPECT",
       "category": "free_consultation",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram borderline commercial comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "UNCERTAIN",
-        "matched_categories": []
-      },
-      "ambiguous_reason": "'무료 상담'은 마케팅 낚시 문구로 자주 사용되나 정당한 전문가 서비스일 수 있음.",
-      "notes": "무료 상담 + 프로필 링크 유도. 직접 URL 미포함."
+      "matched_categories": [],
+      "notes": "'무료 상담'은 마케팅 낚시 문구로 자주 사용되나 정당한 전문가 서비스일 수 있음. 무료 상담 + 프로필 링크 유도."
     },
     {
-      "id": 76,
+      "id": "KR-SUSPECT-016",
       "text": "여기 제가 운영하는 계정인데 놀러오세요 🙏",
-      "label": "ambiguous",
+      "expected_status": "SUSPECT",
       "category": "self_promotion",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram borderline commercial comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "UNCERTAIN",
-        "matched_categories": []
-      },
-      "ambiguous_reason": "계정 홍보 댓글. 진성 커뮤니티 홍보일 수 있고 봇 계정 유입 시도일 수 있음.",
-      "notes": "URL 없음. 계정 유도 패턴."
+      "matched_categories": [],
+      "notes": "계정 홍보 댓글. 진성 커뮤니티 홍보일 수 있고 봇 계정 유입 시도일 수 있음. URL 없음."
     },
     {
-      "id": 77,
+      "id": "KR-SUSPECT-017",
       "text": "저도 인스타 키우고 싶은데 어떻게 시작하셨어요? DM 드려도 될까요?",
-      "label": "ambiguous",
+      "expected_status": "SUSPECT",
       "category": "question",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram borderline commercial comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "UNCERTAIN",
-        "matched_categories": []
-      },
-      "ambiguous_reason": "DM 요청 포함이나 진성 질문일 수 있음. 팔로워 구매 서비스 유도의 첫 단계일 수도.",
-      "notes": "DM 요청 단독 패턴. 진성 질문과 스팸 구분 어려움."
+      "matched_categories": [],
+      "notes": "DM 요청 포함이나 진성 질문일 수 있음. 팔로워 구매 서비스 유도의 첫 단계일 수도. DM 요청 단독 패턴은 진성 질문과 스팸 구분 어려움."
     },
     {
-      "id": 78,
+      "id": "KR-SUSPECT-018",
       "text": "와 저도 이거 써봤는데 효과 진짜 좋아요✨ 제 계정에 후기 올려뒀어요",
-      "label": "ambiguous",
+      "expected_status": "SUSPECT",
       "category": "self_promotion",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram borderline commercial comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "UNCERTAIN",
-        "matched_categories": []
-      },
-      "ambiguous_reason": "사용 후기 공유처럼 보이나 자기 계정으로 트래픽 유도하는 스팸 패턴.",
-      "notes": "직접 URL 없음. '제 계정에' 유도."
+      "matched_categories": [],
+      "notes": "사용 후기 공유처럼 보이나 자기 계정으로 트래픽 유도하는 스팸 패턴. 직접 URL 없음."
     },
     {
-      "id": 79,
+      "id": "KR-SUSPECT-019",
       "text": "대출 관련 제도 개선됐다는 거 아세요? 정보 공유 차원에서 댓글 남겨요",
-      "label": "ambiguous",
+      "expected_status": "SUSPECT",
       "category": "information",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram borderline commercial comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "UNCERTAIN",
-        "matched_categories": ["loan"]
-      },
-      "ambiguous_reason": "'대출' 키워드 매칭되나 연락처/URL 없는 정보성 댓글일 수 있음. 대출 스팸의 위장일 수도.",
-      "notes": "대출 키워드 단독. 연락처 없으면 낮은 스코어. UNCERTAIN 처리가 적절."
+      "matched_categories": ["loan"],
+      "notes": "'대출' 키워드 매칭되나 연락처/URL 없는 정보성 댓글일 수 있음. 대출 스팸의 위장일 수도. 연락처 없으면 낮은 스코어."
     },
     {
-      "id": 80,
+      "id": "KR-SUSPECT-020",
       "text": "영상에서 언급한 제품이 저희 매장에도 있어요! 오시면 할인 드릴게요",
-      "label": "ambiguous",
+      "expected_status": "SUSPECT",
       "category": "commercial_service",
+      "source_type": "synthetic_from_research",
+      "source_note": "Instagram borderline commercial comments",
       "evasion_techniques": [],
-      "expected_detection": {
-        "label": "UNCERTAIN",
-        "matched_categories": []
-      },
-      "ambiguous_reason": "오프라인 매장 홍보. URL 없음. 게시물 내용과 관련된 정당한 홍보일 수 있고 무관한 스팸일 수 있음.",
-      "notes": "맥락 파악 없이는 판단 불가. 사람 검수 필요."
+      "matched_categories": [],
+      "notes": "오프라인 매장 홍보. URL 없음. 게시물 내용과 관련된 정당한 홍보일 수 있고 무관한 스팸일 수 있음. 맥락 파악 없이는 판단 불가."
     }
   ]
 }
