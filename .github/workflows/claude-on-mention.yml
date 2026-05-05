@@ -26,12 +26,12 @@ jobs:
       pull-requests: write
       issues: write
     steps:
-      - uses: anthropics/claude-code-action@beta
+      - uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          custom_instructions: |
-            You are the K-SpamGuard project assistant (Korean Instagram spam detection SaaS).
+          claude_args: >-
+            --append-system-prompt "You are the K-SpamGuard project assistant (Korean Instagram spam detection SaaS).
             Architecture: Hexagonal (domain/application/infrastructure/presentation).
             Stack: Java 21, Spring Boot 3, PostgreSQL, Redis, Next.js 14.
 
@@ -40,4 +40,4 @@ jobs:
             When asked to review infra, focus on: secret management, Dockerfile safety, CI correctness.
 
             Always reference specific files and line numbers.
-            Never suggest features beyond the current task scope.
+            Never suggest features beyond the current task scope."
