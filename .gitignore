@@ -1,0 +1,54 @@
+# Secrets & Environment
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.jks
+secrets/
+
+# Java / Spring Boot
+backend/build/
+backend/.gradle/
+backend/out/
+*.class
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Gradle
+.gradle/
+gradle-app.setting
+
+# Node / Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env.local
+frontend/.env.*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Docker
+*.log
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDE
+.vscode/settings.json
+.vscode/*.code-workspace
+*.swp
+*.swo
+
+# Test / Coverage
+**/test-results/
+**/jacoco/
+coverage/

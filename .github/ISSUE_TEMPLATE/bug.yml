@@ -1,0 +1,42 @@
+name: Bug Report
+description: 버그 신고
+labels: ["fix"]
+body:
+  - type: input
+    id: summary
+    attributes:
+      label: 버그 요약
+      placeholder: "예: Webhook 서명 검증 실패 시 500 반환"
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 재현 방법
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 기대 동작
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 실제 동작
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: 심각도
+      options:
+        - Critical (데이터 손실 / 보안)
+        - High (핵심 기능 불가)
+        - Medium (기능 저하)
+        - Low (UX 이슈)
