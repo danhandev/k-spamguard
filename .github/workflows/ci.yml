@@ -32,6 +32,8 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           cache: gradle
+      - name: Check formatting
+        run: cd backend && ./gradlew spotlessCheck --no-daemon
       - name: Run tests
         run: cd backend && ./gradlew test --no-daemon
       - name: Upload test report
