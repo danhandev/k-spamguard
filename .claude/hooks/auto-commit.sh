@@ -41,9 +41,7 @@ TIMESTAMP=$(date '+%Y-%m-%d %H:%M')
 
 git commit -m "auto: claude session [$TIMESTAMP]
 
-Changed: $CHANGED
-
-Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
+Changed: $CHANGED"
 
 # Push (best-effort)
 git push -u origin "$BRANCH" 2>/dev/null || git push 2>/dev/null || true

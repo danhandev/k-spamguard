@@ -10,7 +10,6 @@ Steps to follow:
    - Format: `<type>(<scope>): <subject>` — e.g. `feat(webhook): add idempotency key deduplication`
    - Types: feat, fix, refactor, test, docs, chore, security
    - Body: bullet list of what changed and why
-   - Footer: `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>`
 5. Commit: `git commit -m "..."`
 6. Push: `git push -u origin <current-branch>`
 7. Check if a PR already exists for this branch: `gh pr view --json number,url`

@@ -44,6 +44,10 @@
 2. 변경된 파일 요약
 3. 남은 리스크 언급
 
+## Commit Rules
+- 커밋 메시지에 `Co-Authored-By: Claude` 트레일러 추가 금지
+- 커밋 작성자는 항상 사용자(danhandev)로만 표시
+
 ## What NOT to Do
 - 불필요한 추상화 계층 추가 금지
 - 현재 요구사항에 없는 기능 선제 구현 금지
