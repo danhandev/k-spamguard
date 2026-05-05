@@ -1,12 +1,12 @@
 # API Contract: K-SpamGuard
-**버전 0.1 · 2026-05-05 · Base URL: `https://api.k-spamguard.io/v1`**
+**버전 0.2 · 2026-05-05 · Base URL: `https://api.k-spamguard.io`**
 
 ---
 
 ## 공통 사항
 
 ### 인증
-모든 엔드포인트는 JWT Bearer 토큰 필요 (단, Demo Import와 Webhook 검증 챌린지 제외).
+모든 엔드포인트는 JWT Bearer 토큰 필요 (단, Demo Comments와 Webhook 검증 챌린지 제외).
 
 ```
 Authorization: Bearer {jwt_token}
@@ -40,11 +40,11 @@ Authorization: Bearer {jwt_token}
 
 ---
 
-## 1. Demo Import API
+## 1. Demo Comments API
 
-포트폴리오 데모용 시나리오 댓글 일괄 임포트. 실제 Instagram Webhook 없이 탐지 엔진 동작을 시연한다.
+포트폴리오 데모용 댓글 일괄 생성 및 즉시 탐지. 실제 Instagram 계정 없이 탐지 엔진 동작을 시연한다.
 
-### `POST /demo/import`
+### `POST /api/v1/demo/comments`
 
 **인증**: 불필요 (데모 전용, Rate Limit: 10 req/분)
 
@@ -52,44 +52,57 @@ Authorization: Bearer {jwt_token}
 
 ```json
 {
-  "account_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-  "scenario": "mixed_spam"
-}
-```
-
-| 필드 | 타입 | 필수 | 설명 |
-|---|---|---|---|
-| `account_id` | UUID | Y | 임포트 대상 데모 계정 UUID |
-| `scenario` | string | N | `"mixed_spam"` (기본) \| `"heavy_spam"` \| `"all_ham"` |
-
-**Response `201 Created`**
-
-```json
-{
-  "imported_count": 30,
-  "spam_count": 14,
-  "ham_count": 10,
-  "uncertain_count": 6,
   "comments": [
     {
-      "id": "uuid-...",
-      "ig_comment_id": "demo_17858001234567890",
-      "raw_text": "카·지·노 무료머니 지급 카카오 ID: abc123",
-      "normalized_text": "카지노 무료머니 지급 카카오 ID abc123",
-      "spam_score": 0.92,
-      "status": "SPAM",
-      "matched_rules": ["GAMBLING_KEYWORD", "CONTACT_ID_PATTERN"]
+      "external_comment_id": "demo_17858001234567890",
+      "username": "spammer123",
+      "text": "카·지·노 무료머니 지급 카카오 ID: abc123"
     }
   ]
 }
 ```
 
-**에러**
+| 필드 | 타입 | 필수 | 설명 |
+|---|---|---|---|
+| `comments` | array | Y | 댓글 목록 (최대 100개) |
+| `comments[].external_comment_id` | string | Y | Instagram 댓글 ID (또는 임의 데모 ID) |
+| `comments[].username` | string | Y | 작성자 계정명 |
+| `comments[].text` | string | Y | 댓글 원문 |
 
-| 코드 | 상태 | 설명 |
+**Response `201 Created`**
+
+```json
+{
+  "imported_count": 3,
+  "results": [
+    {
+      "external_comment_id": "demo_17858001234567890",
+      "status": "SPAM",
+      "score": 92,
+      "reason_codes": ["GAMBLING_KEYWORD", "CONTACT_ID_PATTERN"]
+    },
+    {
+      "external_comment_id": "demo_17858001234567891",
+      "status": "SAFE",
+      "score": 5,
+      "reason_codes": []
+    },
+    {
+      "external_comment_id": "demo_17858001234567892",
+      "status": "SUSPECT",
+      "score": 45,
+      "reason_codes": ["PROMOTIONAL_PATTERN"]
+    }
+  ]
+}
+```
+
+| 필드 | 타입 | 설명 |
 |---|---|---|
-| `DEMO_ACCOUNT_NOT_FOUND` | 404 | 해당 UUID 데모 계정 없음 |
-| `DEMO_ALREADY_IMPORTED` | 409 | 해당 계정에 이미 데모 데이터 존재 |
+| `imported_count` | int | 처리된 댓글 수 |
+| `results[].status` | string | `SAFE` \| `SUSPECT` \| `SPAM` |
+| `results[].score` | int | 스팸 점수 (0 – 100) |
+| `results[].reason_codes` | string[] | 매칭된 룰 코드 목록 |
 
 ---
 
@@ -97,13 +110,13 @@ Authorization: Bearer {jwt_token}
 
 ### 2.1 댓글 목록 조회
 
-**`GET /accounts/{accountId}/comments`**
+**`GET /api/v1/accounts/{accountId}/comments`**
 
 **Query Parameters**
 
 | 파라미터 | 타입 | 기본값 | 설명 |
 |---|---|---|---|
-| `status` | string | (전체) | `SPAM` \| `HAM` \| `UNCERTAIN` \| `PENDING` |
+| `status` | string | (전체) | `SPAM` \| `SUSPECT` \| `SAFE` \| `PENDING` |
 | `score_min` | float | 0.0 | 스팸 스코어 하한 (0.0 ~ 1.0) |
 | `score_max` | float | 1.0 | 스팸 스코어 상한 |
 | `from` | ISO 8601 | (7일 전) | 수신 시각 범위 시작 |
@@ -146,7 +159,7 @@ Authorization: Bearer {jwt_token}
 
 ### 2.2 댓글 상세 조회
 
-**`GET /accounts/{accountId}/comments/{commentId}`**
+**`GET /api/v1/accounts/{accountId}/comments/{commentId}`**
 
 **Response `200 OK`**
 
@@ -187,22 +200,23 @@ Authorization: Bearer {jwt_token}
 
 ### 2.3 댓글 재분석
 
-룰 업데이트 후 이전 댓글을 다시 평가할 때 사용한다.
+룰 업데이트 후 이전 댓글을 다시 평가할 때 사용한다. 재분석 결과를 새 리소스로 생성한다.
 
-**`POST /accounts/{accountId}/comments/{commentId}/reanalyze`**
+**`POST /api/v1/accounts/{accountId}/comments/{commentId}/analyses`**
 
 **Request Body**: 없음
 
-**Response `200 OK`**
+**Response `201 Created`**
 
 ```json
 {
-  "id": "uuid-...",
-  "previous_status": "HAM",
+  "id": "uuid-analysis-...",
+  "comment_id": "uuid-...",
+  "previous_status": "SAFE",
   "previous_score": 0.10,
   "new_status": "SPAM",
   "new_score": 0.85,
-  "reanalyzed_at": "2026-05-05T10:30:00Z"
+  "analyzed_at": "2026-05-05T10:30:00Z"
 }
 ```
 
@@ -212,14 +226,14 @@ Authorization: Bearer {jwt_token}
 
 ### 3.1 검수 큐 목록
 
-**`GET /accounts/{accountId}/moderation`**
+**`GET /api/v1/accounts/{accountId}/moderation`**
 
 **Query Parameters**
 
 | 파라미터 | 타입 | 기본값 | 설명 |
 |---|---|---|---|
 | `status` | string | `PENDING_REVIEW` | `PENDING_REVIEW` \| `APPROVED` \| `REJECTED` \| `COMPLETED` \| `FAILED` |
-| `action_type` | string | (전체) | `HIDE` \| `DELETE` |
+| `action_type` | string | (전체) | `HIDE` \| `DELETE` \| `UNHIDE` |
 | `score_min` | float | 0.0 | 스팸 스코어 하한 |
 | `from` | ISO 8601 | (7일 전) | 생성 시각 범위 시작 |
 | `to` | ISO 8601 | (현재) | 생성 시각 범위 종료 |
@@ -258,34 +272,44 @@ Authorization: Bearer {jwt_token}
 
 ---
 
-### 3.2 검수 항목 승인 (숨김 / 삭제)
+### 3.2 검수 항목 상태 변경 (승인 / 거부)
 
-**`POST /accounts/{accountId}/moderation/{actionId}/approve`**
+**`PATCH /api/v1/accounts/{accountId}/moderation/{actionId}`**
 
 **소유권 검증**: `moderation.account.owner_id == current_user_id` — 불일치 시 403
 
-**구독 한도 검증**: 월 처리 한도 초과 시 429 반환
+**구독 한도 검증**: 월 처리 한도 초과 시 429 반환 (승인 시에만)
 
-**Request Body**
+**Request Body — 승인**
 
 ```json
 {
+  "status": "APPROVED",
   "action_type": "HIDE"
+}
+```
+
+**Request Body — 거부**
+
+```json
+{
+  "status": "REJECTED"
 }
 ```
 
 | 필드 | 타입 | 필수 | 설명 |
 |---|---|---|---|
-| `action_type` | string | Y | `HIDE` \| `DELETE` |
+| `status` | string | Y | `APPROVED` \| `REJECTED` |
+| `action_type` | string | 조건부 | `HIDE` \| `DELETE` — `status: APPROVED` 시 필수 |
 
-**Response `202 Accepted`** — 비동기 큐 적재
+**Response `202 Accepted`** (승인) / **`200 OK`** (거부)
 
 ```json
 {
   "id": "uuid-action-...",
   "status": "APPROVED",
   "action_type": "HIDE",
-  "approved_at": "2026-05-05T10:00:00Z"
+  "updated_at": "2026-05-05T10:00:00Z"
 }
 ```
 
@@ -299,43 +323,27 @@ Authorization: Bearer {jwt_token}
 
 ---
 
-### 3.3 검수 항목 거부 (정상 처리)
-
-**`POST /accounts/{accountId}/moderation/{actionId}/reject`**
-
-**Request Body**: 없음
-
-**Response `200 OK`**
-
-```json
-{
-  "id": "uuid-action-...",
-  "status": "REJECTED",
-  "rejected_at": "2026-05-05T10:01:00Z"
-}
-```
-
----
-
-### 3.4 일괄 승인
+### 3.3 일괄 상태 변경
 
 한 번에 최대 50개 처리 가능. 초과 시 `VALIDATION_ERROR`.
 
-**`POST /accounts/{accountId}/moderation/bulk-approve`**
+**`PATCH /api/v1/accounts/{accountId}/moderation`**
 
 **Request Body**
 
 ```json
 {
   "action_ids": ["uuid-action-1", "uuid-action-2"],
+  "status": "APPROVED",
   "action_type": "HIDE"
 }
 ```
 
 | 필드 | 타입 | 필수 | 설명 |
 |---|---|---|---|
-| `action_ids` | UUID[] | Y | 승인할 Action ID 목록 (최대 50개) |
-| `action_type` | string | Y | `HIDE` \| `DELETE` |
+| `action_ids` | UUID[] | Y | 대상 Action ID 목록 (최대 50개) |
+| `status` | string | Y | `APPROVED` \| `REJECTED` |
+| `action_type` | string | 조건부 | `HIDE` \| `DELETE` — `status: APPROVED` 시 필수 |
 
 **Response `202 Accepted`**
 
@@ -354,22 +362,34 @@ Authorization: Bearer {jwt_token}
 
 ---
 
-### 3.5 숨김 복구 (오탐 복구)
+### 3.4 숨김 복구 (오탐 복구)
 
-자동 모드에서 잘못 숨김 처리된 댓글을 복구한다.
+자동 모드에서 잘못 숨김 처리된 댓글을 복구하는 새 액션을 생성한다.
 
-**`POST /accounts/{accountId}/moderation/{actionId}/restore`**
+**`POST /api/v1/accounts/{accountId}/moderation`**
 
-**조건**: `action.status == COMPLETED && action.action_type == HIDE`
+**조건**: 원본 액션의 `status == COMPLETED && action_type == HIDE`
 
-**Request Body**: 없음
+**Request Body**
+
+```json
+{
+  "comment_id": "uuid-comment-...",
+  "action_type": "UNHIDE"
+}
+```
+
+| 필드 | 타입 | 필수 | 설명 |
+|---|---|---|---|
+| `comment_id` | UUID | Y | 복구 대상 댓글 UUID |
+| `action_type` | string | Y | `UNHIDE` 고정 |
 
 **Response `202 Accepted`**
 
 ```json
 {
   "id": "uuid-restore-action-...",
-  "original_action_id": "uuid-action-...",
+  "comment_id": "uuid-comment-...",
   "status": "APPROVED",
   "action_type": "UNHIDE",
   "created_at": "2026-05-05T10:10:00Z"
@@ -382,7 +402,7 @@ Authorization: Bearer {jwt_token}
 
 ### 4.1 감사 로그 목록
 
-**`GET /audit-logs`**
+**`GET /api/v1/audit-logs`**
 
 감사 로그는 사용자 스코프 전체 (모든 연동 계정 포함).
 
@@ -442,7 +462,7 @@ Authorization: Bearer {jwt_token}
 
 ### 4.2 감사 로그 상세
 
-**`GET /audit-logs/{logId}`**
+**`GET /api/v1/audit-logs/{logId}`**
 
 **Response `200 OK`**
 
