@@ -3,17 +3,22 @@ package com.kspamguard.infrastructure.persistence;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.kspamguard.domain.detection.DetectionStatus;
+import com.kspamguard.infrastructure.persistence.adapter.AuditLogPersistenceAdapter;
 import com.kspamguard.infrastructure.persistence.adapter.CommentPersistenceAdapter;
 import com.kspamguard.infrastructure.persistence.adapter.DetectionResultPersistenceAdapter;
 import com.kspamguard.infrastructure.persistence.adapter.ModerationQueuePersistenceAdapter;
+import com.kspamguard.infrastructure.persistence.adapter.ModerationQueueQueryAdapter;
+import com.kspamguard.infrastructure.persistence.entity.AuditLogJpaEntity;
 import com.kspamguard.infrastructure.persistence.entity.CommentJpaEntity;
 import com.kspamguard.infrastructure.persistence.entity.DetectionResultJpaEntity;
 import com.kspamguard.infrastructure.persistence.entity.ModerationQueueItemJpaEntity;
+import com.kspamguard.infrastructure.persistence.repository.AuditLogJpaRepository;
 import com.kspamguard.infrastructure.persistence.repository.CommentJpaRepository;
 import com.kspamguard.infrastructure.persistence.repository.DetectionResultJpaRepository;
 import com.kspamguard.infrastructure.persistence.repository.ModerationQueueItemJpaRepository;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,9 +38,12 @@ class DemoPersistenceIntegrationTest {
   @Autowired CommentPersistenceAdapter commentAdapter;
   @Autowired DetectionResultPersistenceAdapter detectionResultAdapter;
   @Autowired ModerationQueuePersistenceAdapter moderationQueueAdapter;
+  @Autowired ModerationQueueQueryAdapter moderationQueueQueryAdapter;
+  @Autowired AuditLogPersistenceAdapter auditLogAdapter;
   @Autowired CommentJpaRepository commentRepo;
   @Autowired DetectionResultJpaRepository detectionResultRepo;
   @Autowired ModerationQueueItemJpaRepository moderationQueueRepo;
+  @Autowired AuditLogJpaRepository auditLogRepo;
 
   @Test
   void saveComment_persistsAndReturnsId() {
@@ -101,5 +109,53 @@ class DemoPersistenceIntegrationTest {
     DetectionResultJpaEntity entity = detectionResultRepo.findAll().get(0);
     assertThat(entity.getReasonCodes())
         .containsExactlyInAnyOrder("LOAN_KEYWORD", "GAMBLING_KEYWORD");
+  }
+
+  @Test
+  void reviewItem_approve_updatesStatusAndCreatesAuditLog() {
+    Long commentId = commentAdapter.save("demo-tc-006", "spammer", "스팸", "스팸", Instant.now());
+    moderationQueueAdapter.enqueue(commentId, "HIDE", Instant.now());
+    Long itemId = moderationQueueRepo.findAll().get(0).getId();
+
+    moderationQueueAdapter.review(itemId, "APPROVED", Instant.now());
+    auditLogAdapter.log(
+        "moderation_approve",
+        "moderation_queue_item",
+        itemId,
+        Map.of("reviewer_note", "명백한 스팸"),
+        Instant.now());
+
+    ModerationQueueItemJpaEntity item = moderationQueueRepo.findById(itemId).orElseThrow();
+    assertThat(item.getStatus()).isEqualTo("APPROVED");
+    assertThat(item.getReviewedAt()).isNotNull();
+
+    List<AuditLogJpaEntity> logs = auditLogRepo.findAll();
+    assertThat(logs).hasSize(1);
+    assertThat(logs.get(0).getEventType()).isEqualTo("moderation_approve");
+    assertThat(logs.get(0).getTargetId()).isEqualTo(itemId);
+  }
+
+  @Test
+  void reviewItem_reject_updatesStatusToRejected() {
+    Long commentId = commentAdapter.save("demo-tc-007", "spammer2", "도박", "도박", Instant.now());
+    moderationQueueAdapter.enqueue(commentId, "HIDE", Instant.now());
+    Long itemId = moderationQueueRepo.findAll().get(0).getId();
+
+    moderationQueueAdapter.review(itemId, "REJECTED", Instant.now());
+
+    assertThat(moderationQueueRepo.findById(itemId).orElseThrow().getStatus())
+        .isEqualTo("REJECTED");
+  }
+
+  @Test
+  void findByStatus_returnsPendingItems() {
+    Long c1 = commentAdapter.save("demo-tc-008a", "u1", "스팸1", "스팸1", Instant.now());
+    Long c2 = commentAdapter.save("demo-tc-008b", "u2", "스팸2", "스팸2", Instant.now());
+    moderationQueueAdapter.enqueue(c1, "HIDE", Instant.now());
+    moderationQueueAdapter.enqueue(c2, "HIDE", Instant.now());
+
+    var pending = moderationQueueQueryAdapter.findByStatus("PENDING_REVIEW");
+    assertThat(pending).hasSize(2);
+    assertThat(pending).allMatch(v -> "PENDING_REVIEW".equals(v.status()));
   }
 }
