@@ -1,7 +1,7 @@
 package com.kspamguard.infrastructure.config;
 
-import com.kspamguard.domain.detection.KoreanNormalizer;
-import com.kspamguard.domain.detection.RuleBasedSpamDetector;
+import com.kspamguard.domain.detection.KoreanTextNormalizer;
+import com.kspamguard.domain.detection.SpamDetectionEngine;
 import com.kspamguard.domain.detection.SpamDetector;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,12 +10,12 @@ import org.springframework.context.annotation.Configuration;
 public class DetectionConfig {
 
     @Bean
-    KoreanNormalizer koreanNormalizer() {
-        return new KoreanNormalizer();
+    KoreanTextNormalizer koreanTextNormalizer() {
+        return new KoreanTextNormalizer();
     }
 
     @Bean
-    SpamDetector spamDetector(KoreanNormalizer normalizer) {
-        return new RuleBasedSpamDetector(normalizer);
+    SpamDetector spamDetector(KoreanTextNormalizer normalizer) {
+        return new SpamDetectionEngine(normalizer);
     }
 }

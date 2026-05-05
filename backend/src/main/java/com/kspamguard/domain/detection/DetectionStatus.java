@@ -1,6 +1,6 @@
 package com.kspamguard.domain.detection;
 
-public enum Verdict {
+public enum DetectionStatus {
     SAFE,
     SUSPECT,
     SPAM
