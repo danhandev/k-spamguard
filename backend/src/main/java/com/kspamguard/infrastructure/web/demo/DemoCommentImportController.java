@@ -3,7 +3,9 @@ package com.kspamguard.infrastructure.web.demo;
 import com.kspamguard.application.demo.DemoCommentImportUseCase;
 import com.kspamguard.application.demo.DemoCommentItem;
 import com.kspamguard.application.demo.DemoDetectionResult;
+import jakarta.validation.Valid;
 import java.util.List;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,8 +22,9 @@ public class DemoCommentImportController {
     this.demoCommentImportUseCase = demoCommentImportUseCase;
   }
 
-  @PostMapping("/comments/import")
-  public ResponseEntity<DemoImportResponse> importComments(@RequestBody DemoImportRequest request) {
+  @PostMapping("/comments")
+  public ResponseEntity<DemoImportResponse> importComments(
+      @Valid @RequestBody DemoImportRequest request) {
     List<DemoCommentItem> items =
         request.comments().stream()
             .map(c -> new DemoCommentItem(c.externalCommentId(), c.username(), c.text()))
@@ -37,6 +40,7 @@ public class DemoCommentImportController {
                         r.externalCommentId(), r.status().name(), r.score(), r.reasonCodes()))
             .toList();
 
-    return ResponseEntity.ok(new DemoImportResponse(entries.size(), entries));
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(new DemoImportResponse(entries.size(), entries));
   }
 }
