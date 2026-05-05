@@ -31,7 +31,7 @@ public class SpamDetectionEngine implements SpamDetector {
 
     double score = Math.min(matches.stream().mapToDouble(m -> m.rule().score()).sum(), 1.0);
 
-    return new DetectionResult(statusFor(score), score, matches);
+    return new DetectionResult(statusFor(score), score, matches, normalized);
   }
 
   private Optional<RuleMatch> tryMatch(String text, SpamRule rule) {
