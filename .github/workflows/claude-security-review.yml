@@ -21,11 +21,11 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - uses: anthropics/claude-code-action@beta
+      - uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          direct_prompt: |
+          prompt: |
             You are the security-reviewer agent for K-SpamGuard (Korean Instagram spam SaaS).
 
             Review this pull request diff for security issues using the OWASP ASVS L2 checklist.
