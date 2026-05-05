@@ -2,10 +2,20 @@ package com.kspamguard.application.demo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.kspamguard.application.detection.DetectCommentCommand;
 import com.kspamguard.application.detection.DetectCommentUseCase;
+import com.kspamguard.application.port.out.CommentPersistencePort;
+import com.kspamguard.application.port.out.DetectionResultPersistencePort;
+import com.kspamguard.application.port.out.ModerationQueuePersistencePort;
 import com.kspamguard.domain.detection.DetectionResult;
 import com.kspamguard.domain.detection.DetectionStatus;
 import com.kspamguard.domain.detection.RuleMatch;
@@ -21,6 +31,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class DemoCommentImportServiceTest {
 
   @Mock DetectCommentUseCase detectCommentUseCase;
+  @Mock CommentPersistencePort commentPersistencePort;
+  @Mock DetectionResultPersistencePort detectionResultPersistencePort;
+  @Mock ModerationQueuePersistencePort moderationQueuePersistencePort;
 
   DemoCommentImportService service;
 
@@ -29,7 +42,17 @@ class DemoCommentImportServiceTest {
 
   @BeforeEach
   void setUp() {
-    service = new DemoCommentImportService(detectCommentUseCase, List.of(dmRule, couponRule));
+    lenient()
+        .when(
+            commentPersistencePort.save(anyString(), anyString(), anyString(), anyString(), any()))
+        .thenReturn(1L);
+    service =
+        new DemoCommentImportService(
+            detectCommentUseCase,
+            List.of(dmRule, couponRule),
+            commentPersistencePort,
+            detectionResultPersistencePort,
+            moderationQueuePersistencePort);
   }
 
   @Test
@@ -38,7 +61,8 @@ class DemoCommentImportServiceTest {
         new DetectionResult(
             DetectionStatus.SPAM,
             0.9,
-            List.of(new RuleMatch(couponRule, "무 ㄹㅛ 쿠폰"), new RuleMatch(dmRule, "dm 주세요")));
+            List.of(new RuleMatch(couponRule, "무 ㄹㅛ 쿠폰"), new RuleMatch(dmRule, "dm 주세요")),
+            "무 ㄹㅛ 쿠폰 받아가세요 dm 주세요");
     when(detectCommentUseCase.detect(any(DetectCommentCommand.class))).thenReturn(spamResult);
 
     var items = List.of(new DemoCommentItem("demo-001", "spam_user", "무 ㄹㅛ 쿠폰 받으실 분 DM 주세요"));
@@ -54,7 +78,8 @@ class DemoCommentImportServiceTest {
 
   @Test
   void safeComment_returnsSafeStatusAndEmptyReasonCodes() {
-    var safeResult = new DetectionResult(DetectionStatus.SAFE, 0.0, List.of());
+    var safeResult =
+        new DetectionResult(DetectionStatus.SAFE, 0.0, List.of(), "영상 잘 봤어요 설명이 정말 좋네요");
     when(detectCommentUseCase.detect(any(DetectCommentCommand.class))).thenReturn(safeResult);
 
     var items = List.of(new DemoCommentItem("demo-002", "normal_user", "영상 잘 봤어요. 설명이 정말 좋네요!"));
@@ -70,8 +95,9 @@ class DemoCommentImportServiceTest {
   @Test
   void multipleComments_returnsResultForEach() {
     var spamResult =
-        new DetectionResult(DetectionStatus.SPAM, 0.9, List.of(new RuleMatch(dmRule, "dm 주세요")));
-    var safeResult = new DetectionResult(DetectionStatus.SAFE, 0.0, List.of());
+        new DetectionResult(
+            DetectionStatus.SPAM, 0.9, List.of(new RuleMatch(dmRule, "dm 주세요")), "dm 주세요");
+    var safeResult = new DetectionResult(DetectionStatus.SAFE, 0.0, List.of(), "좋은 영상이에요");
     when(detectCommentUseCase.detect(any(DetectCommentCommand.class)))
         .thenReturn(spamResult)
         .thenReturn(safeResult);
@@ -95,7 +121,7 @@ class DemoCommentImportServiceTest {
 
   @Test
   void score_isConvertedTo0to100IntRange() {
-    var result = new DetectionResult(DetectionStatus.SUSPECT, 0.456, List.of());
+    var result = new DetectionResult(DetectionStatus.SUSPECT, 0.456, List.of(), "text");
     when(detectCommentUseCase.detect(any(DetectCommentCommand.class))).thenReturn(result);
 
     var items = List.of(new DemoCommentItem("id-1", "u", "text"));
@@ -107,7 +133,8 @@ class DemoCommentImportServiceTest {
   @Test
   void idempotent_sameInputProduceSameOutput() {
     var spamResult =
-        new DetectionResult(DetectionStatus.SPAM, 0.9, List.of(new RuleMatch(dmRule, "dm 주세요")));
+        new DetectionResult(
+            DetectionStatus.SPAM, 0.9, List.of(new RuleMatch(dmRule, "dm 주세요")), "dm 주세요");
     when(detectCommentUseCase.detect(any(DetectCommentCommand.class))).thenReturn(spamResult);
 
     var items = List.of(new DemoCommentItem("demo-001", "spammer", "DM 주세요"));
@@ -116,5 +143,52 @@ class DemoCommentImportServiceTest {
 
     assertThat(first.get(0).score()).isEqualTo(second.get(0).score());
     assertThat(first.get(0).status()).isEqualTo(second.get(0).status());
+  }
+
+  @Test
+  void spamComment_enqueuesHideAction() {
+    var spamResult =
+        new DetectionResult(
+            DetectionStatus.SPAM, 0.9, List.of(new RuleMatch(dmRule, "dm 주세요")), "dm 주세요");
+    when(detectCommentUseCase.detect(any(DetectCommentCommand.class))).thenReturn(spamResult);
+
+    service.importAndDetect(List.of(new DemoCommentItem("id-1", "spammer", "DM 주세요")));
+
+    verify(moderationQueuePersistencePort).enqueue(eq(1L), eq("HIDE"), any());
+  }
+
+  @Test
+  void suspectComment_enqueuesReviewAction() {
+    var suspectResult = new DetectionResult(DetectionStatus.SUSPECT, 0.4, List.of(), "text");
+    when(detectCommentUseCase.detect(any(DetectCommentCommand.class))).thenReturn(suspectResult);
+
+    service.importAndDetect(List.of(new DemoCommentItem("id-1", "user", "text")));
+
+    verify(moderationQueuePersistencePort).enqueue(eq(1L), eq("REVIEW"), any());
+  }
+
+  @Test
+  void safeComment_doesNotEnqueueModerationItem() {
+    var safeResult = new DetectionResult(DetectionStatus.SAFE, 0.0, List.of(), "정상 댓글");
+    when(detectCommentUseCase.detect(any(DetectCommentCommand.class))).thenReturn(safeResult);
+
+    service.importAndDetect(List.of(new DemoCommentItem("id-1", "user", "정상 댓글")));
+
+    verify(moderationQueuePersistencePort, never()).enqueue(anyLong(), anyString(), any());
+  }
+
+  @Test
+  void persistsCommentAndDetectionResult() {
+    var spamResult =
+        new DetectionResult(
+            DetectionStatus.SPAM, 0.9, List.of(new RuleMatch(dmRule, "dm 주세요")), "dm 주세요");
+    when(detectCommentUseCase.detect(any(DetectCommentCommand.class))).thenReturn(spamResult);
+
+    service.importAndDetect(List.of(new DemoCommentItem("demo-001", "spammer", "DM 주세요")));
+
+    verify(commentPersistencePort)
+        .save(eq("demo-001"), eq("spammer"), eq("DM 주세요"), eq("dm 주세요"), any());
+    verify(detectionResultPersistencePort)
+        .save(eq(1L), eq(DetectionStatus.SPAM), eq(90), anyList(), any());
   }
 }

@@ -30,7 +30,7 @@ class DetectCommentServiceTest {
     var rules = List.of(rule);
     var command = new DetectCommentCommand("스팸 댓글", rules);
     var ruleMatch = new RuleMatch(rule, "스팸");
-    var expected = new DetectionResult(DetectionStatus.SPAM, 0.9, List.of(ruleMatch));
+    var expected = new DetectionResult(DetectionStatus.SPAM, 0.9, List.of(ruleMatch), "스팸 댓글");
 
     when(spamDetector.detect(new Comment("스팸 댓글"), rules)).thenReturn(expected);
 
@@ -43,7 +43,7 @@ class DetectCommentServiceTest {
   @Test
   void emptyRules_returnsSAFE() {
     var command = new DetectCommentCommand("정상 댓글", List.of());
-    var expected = new DetectionResult(DetectionStatus.SAFE, 0.0, List.of());
+    var expected = new DetectionResult(DetectionStatus.SAFE, 0.0, List.of(), "정상 댓글");
 
     when(spamDetector.detect(new Comment("정상 댓글"), List.of())).thenReturn(expected);
 

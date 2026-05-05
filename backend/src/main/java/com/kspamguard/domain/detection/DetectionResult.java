@@ -2,7 +2,8 @@ package com.kspamguard.domain.detection;
 
 import java.util.List;
 
-public record DetectionResult(DetectionStatus status, double score, List<RuleMatch> matches) {
+public record DetectionResult(
+    DetectionStatus status, double score, List<RuleMatch> matches, String normalizedText) {
   public DetectionResult {
     matches = List.copyOf(matches);
   }
