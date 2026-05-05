@@ -1,0 +1,52 @@
+name: Auto Security Review
+
+# Automatically runs a security review on every PR touching sensitive paths.
+# Posts findings as a PR review comment. Blocks merge only if CRITICAL findings exist.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'backend/src/**'
+      - 'frontend/src/**'
+      - '.github/workflows/**'
+      - 'infra/**'
+      - 'docker-compose*.yml'
+
+jobs:
+  security-review:
+    name: Claude Security Review
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          direct_prompt: |
+            You are the security-reviewer agent for K-SpamGuard (Korean Instagram spam SaaS).
+
+            Review this pull request diff for security issues using the OWASP ASVS L2 checklist.
+
+            Check specifically:
+            1. Token/secret exposure in logs, responses, or build artifacts
+            2. Missing ownership validation on resource endpoints
+            3. IDOR risks (internal Long IDs exposed externally instead of UUIDs)
+            4. Webhook signature verification (`X-Hub-Signature-256`)
+            5. OAuth token encryption (AES-256-GCM, per-token IV)
+            6. Audit log completeness for state-changing operations
+            7. ReDoS risk from user-supplied regex patterns in spam rules
+            8. Hardcoded secrets in Dockerfiles or workflow YAML
+
+            Severity levels:
+            - CRITICAL: data loss, token exposure, auth bypass → must fix before merge
+            - HIGH: functional security gap → should fix before merge
+            - MEDIUM: defense-in-depth improvement → fix in follow-up
+            - LOW: minor improvement → optional
+
+            If no CRITICAL or HIGH findings: end with "✅ No blocking security issues found."
+            If CRITICAL findings: end with "🚨 CRITICAL issues found — do not merge until resolved."
+
+            Post your review as a structured comment with file:line references.

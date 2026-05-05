@@ -1,0 +1,43 @@
+name: Claude on Mention
+
+# Responds when @claude is mentioned in issues, PRs, or review comments.
+# Usage examples:
+#   @claude review this PR for security issues
+#   @claude which agent should handle this? (spring-architect / security-reviewer / devops-reviewer)
+#   @claude help me understand the hexagonal architecture in this diff
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  issues:
+    types: [opened]
+
+jobs:
+  respond:
+    if: |
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'issues' && contains(github.event.issue.body, '@claude'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    steps:
+      - uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          custom_instructions: |
+            You are the K-SpamGuard project assistant (Korean Instagram spam detection SaaS).
+            Architecture: Hexagonal (domain/application/infrastructure/presentation).
+            Stack: Java 21, Spring Boot 3, PostgreSQL, Redis, Next.js 14.
+
+            When asked to review security, focus on: token encryption, IDOR, log masking, ownership validation.
+            When asked to review architecture, focus on: layer dependency direction, domain purity, port/adapter boundaries.
+            When asked to review infra, focus on: secret management, Dockerfile safety, CI correctness.
+
+            Always reference specific files and line numbers.
+            Never suggest features beyond the current task scope.
