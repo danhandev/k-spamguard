@@ -8,14 +8,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class DetectCommentService implements DetectCommentUseCase {
 
-    private final SpamDetector spamDetector;
+  private final SpamDetector spamDetector;
 
-    public DetectCommentService(SpamDetector spamDetector) {
-        this.spamDetector = spamDetector;
-    }
+  public DetectCommentService(SpamDetector spamDetector) {
+    this.spamDetector = spamDetector;
+  }
 
-    @Override
-    public DetectionResult detect(DetectCommentCommand command) {
-        return spamDetector.detect(new Comment(command.text()), command.rules());
-    }
+  @Override
+  public DetectionResult detect(DetectCommentCommand command) {
+    return spamDetector.detect(new Comment(command.text()), command.rules());
+  }
 }

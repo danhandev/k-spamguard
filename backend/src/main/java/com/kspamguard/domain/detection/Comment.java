@@ -1,4 +1,3 @@
 package com.kspamguard.domain.detection;
 
-public record Comment(String text) {
-}
+public record Comment(String text) {}

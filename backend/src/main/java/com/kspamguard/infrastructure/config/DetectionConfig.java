@@ -9,13 +9,13 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class DetectionConfig {
 
-    @Bean
-    KoreanTextNormalizer koreanTextNormalizer() {
-        return new KoreanTextNormalizer();
-    }
+  @Bean
+  KoreanTextNormalizer koreanTextNormalizer() {
+    return new KoreanTextNormalizer();
+  }
 
-    @Bean
-    SpamDetector spamDetector(KoreanTextNormalizer normalizer) {
-        return new SpamDetectionEngine(normalizer);
-    }
+  @Bean
+  SpamDetector spamDetector(KoreanTextNormalizer normalizer) {
+    return new SpamDetectionEngine(normalizer);
+  }
 }
