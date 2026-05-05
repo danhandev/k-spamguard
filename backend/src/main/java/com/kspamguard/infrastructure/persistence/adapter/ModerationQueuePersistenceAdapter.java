@@ -17,8 +17,18 @@ public class ModerationQueuePersistenceAdapter implements ModerationQueuePersist
 
   @Override
   public void enqueue(Long commentId, String recommendedAction, Instant createdAt) {
+    repository.save(
+        new ModerationQueueItemJpaEntity(
+            commentId, recommendedAction, "PENDING_REVIEW", createdAt));
+  }
+
+  @Override
+  public void review(Long id, String status, Instant reviewedAt) {
     ModerationQueueItemJpaEntity entity =
-        new ModerationQueueItemJpaEntity(commentId, recommendedAction, "PENDING_REVIEW", createdAt);
+        repository
+            .findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Moderation item not found: " + id));
+    entity.markReviewed(status, reviewedAt);
     repository.save(entity);
   }
 }

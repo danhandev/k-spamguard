@@ -28,6 +28,12 @@ public class ModerationQueueItemJpaEntity {
   @Column(name = "created_at", nullable = false)
   private Instant createdAt;
 
+  @Column(name = "reviewed_at")
+  private Instant reviewedAt;
+
+  @Column(name = "reviewer_note", length = 500)
+  private String reviewerNote;
+
   protected ModerationQueueItemJpaEntity() {}
 
   public ModerationQueueItemJpaEntity(
@@ -56,5 +62,14 @@ public class ModerationQueueItemJpaEntity {
 
   public Instant getCreatedAt() {
     return createdAt;
+  }
+
+  public Instant getReviewedAt() {
+    return reviewedAt;
+  }
+
+  public void markReviewed(String newStatus, Instant reviewedAt) {
+    this.status = newStatus;
+    this.reviewedAt = reviewedAt;
   }
 }
