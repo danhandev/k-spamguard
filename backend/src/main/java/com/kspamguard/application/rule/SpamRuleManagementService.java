@@ -59,7 +59,8 @@ public class SpamRuleManagementService
             .findById(command.id())
             .orElseThrow(() -> new SpamRuleNotFoundException(command.id()));
     Instant now = Instant.now();
-    persistencePort.update(command.id(), command.pattern(), command.threshold(), command.enabled(), now);
+    persistencePort.update(
+        command.id(), command.pattern(), command.threshold(), command.enabled(), now);
     auditLogPort.log(
         "rule_update",
         "spam_rule",
@@ -78,8 +79,7 @@ public class SpamRuleManagementService
         queryPort.findById(id).orElseThrow(() -> new SpamRuleNotFoundException(id));
     Instant now = Instant.now();
     persistencePort.disable(id, now);
-    auditLogPort.log(
-        "rule_delete", "spam_rule", id, Map.of("rule_code", existing.ruleCode()), now);
+    auditLogPort.log("rule_delete", "spam_rule", id, Map.of("rule_code", existing.ruleCode()), now);
   }
 
   @Override

@@ -32,7 +32,8 @@ class SpamRuleIntegrationTest {
   void seedData_loadedFromV7() {
     List<SpamRuleView> enabled = queryAdapter.findAllEnabled();
     assertThat(enabled).hasSize(7);
-    assertThat(enabled).extracting(SpamRuleView::ruleCode)
+    assertThat(enabled)
+        .extracting(SpamRuleView::ruleCode)
         .containsExactlyInAnyOrder(
             "OBFUSCATED_FREE_COUPON",
             "DM_LURE",

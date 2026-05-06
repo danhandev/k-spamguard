@@ -57,7 +57,8 @@ public class SpamRuleJpaEntity {
     this.updatedAt = updatedAt;
   }
 
-  public void applyUpdate(String pattern, BigDecimal threshold, boolean enabled, Instant updatedAt) {
+  public void applyUpdate(
+      String pattern, BigDecimal threshold, boolean enabled, Instant updatedAt) {
     this.pattern = pattern;
     this.threshold = threshold;
     this.enabled = enabled;

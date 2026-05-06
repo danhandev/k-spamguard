@@ -62,7 +62,8 @@ class SpamRuleManagementServiceTest {
             () -> service.create(new CreateSpamRuleCommand("DM_LURE", "REGEX", "dm", 0.4)))
         .isInstanceOf(DuplicateRuleCodeException.class);
 
-    verify(persistencePort, never()).create(anyString(), anyString(), anyString(), anyDouble(), any());
+    verify(persistencePort, never())
+        .create(anyString(), anyString(), anyString(), anyDouble(), any());
   }
 
   @Test
@@ -73,7 +74,8 @@ class SpamRuleManagementServiceTest {
             () -> service.update(new UpdateSpamRuleCommand(99L, "new-pattern", 0.5, true)))
         .isInstanceOf(SpamRuleNotFoundException.class);
 
-    verify(persistencePort, never()).update(any(), anyString(), anyDouble(), any(Boolean.class), any());
+    verify(persistencePort, never())
+        .update(any(), anyString(), anyDouble(), any(Boolean.class), any());
   }
 
   @Test
