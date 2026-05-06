@@ -163,6 +163,98 @@ class SpamDetectionEngineTest {
     assertThat(result.matches()).isEmpty();
   }
 
+  // ── 검색 유도형 성인 스팸 ───────────────────────────────────────────────────
+  //
+  // 패턴: "[X]를 구글에서 검색하면 [성인 콘텐츠] 나옴"
+  // 인물명/단어가 바뀌어도 CTA 구조로 탐지한다.
+
+  // SEARCH_CTA: 검색엔진(구글 변형) + 검색 동사가 50자 이내 공존
+  private static final SpamRule SEARCH_CTA =
+      SpamRule.regex(
+          "SEARCH_CTA", "(?:구 ?글|꾸 ?글|[0-9].{0,2}글).{0,50}검.{0,5}색", 0.8);
+
+  private static final SpamRule CHILD_INCIDENT =
+      SpamRule.keyword("CHILD_INCIDENT", "이동사건", 0.9);
+
+  private static final SpamRule BROADCAST_ACCIDENT =
+      SpamRule.keyword("BROADCAST_ACCIDENT", "방송사고", 0.7);
+
+  private static final SpamRule ADULT_CUP = SpamRule.keyword("ADULT_CUP", "g컵", 0.7);
+
+  private static final List<SpamRule> ADULT_RULES =
+      List.of(SEARCH_CTA, CHILD_INCIDENT, BROADCAST_ACCIDENT, ADULT_CUP);
+
+  @Test
+  void adultSpam_spaceObfuscatedChildIncident_returnsSPAM() {
+    // "이 동 사 건" → 4글자 공백 병합 → "이동사건" → CHILD_INCIDENT
+    var result =
+        engine.detect(
+            new Comment(
+                "실제 댓글 데이터를 가져와 볼게 <성 세라 사건> 꾸 글에 입..력하면 ㅇ ㅏ 이 동 사 건 나옴.ㅋㅋ ㄷㄷㄷ 어린애들은 검색하지 마라 ㅡㅡ미드 장난아니더라"),
+            ADULT_RULES);
+    assertThat(result.status()).isEqualTo(DetectionStatus.SPAM);
+    assertThat(result.reasonCodes()).contains("CHILD_INCIDENT");
+  }
+
+  @Test
+  void adultSpam_digitObfuscatedGoogleSearch_returnsSPAM() {
+    // "9..글에 검. 색" — 숫자+점 변형 구글 + 점+공백 삽입 검색
+    // SPECIAL_BETWEEN_KOREAN: 숫자/공백 뒤 특수문자는 미제거 → regex가 그대로 매칭
+    var result =
+        engine.detect(
+            new Comment(
+                "[성세라 녹음봄] 9..글에 검. 색하고  방문 자물쇠로 잠궈놓고 달려가 지컵ㄹㅈㄷ그거 나옴ㅋㅋ 이거 밤에 문잠그고 몰래 본다더라ㅋㅋ"),
+            ADULT_RULES);
+    assertThat(result.status()).isEqualTo(DetectionStatus.SPAM);
+    assertThat(result.reasonCodes()).contains("SEARCH_CTA");
+  }
+
+  @Test
+  void adultSpam_spaceObfuscatedGoogleSearchAndBroadcastAccident_returnsSPAM() {
+    // "구 글 검 색하면" → 4글자 공백 병합 → "구글검색하면" → SEARCH_CTA
+    // "방송사고" → BROADCAST_ACCIDENT
+    var result =
+        engine.detect(
+            new Comment(
+                "성세라 G컵<<구 글 검 색하면 VIP 전용 방송사고나옴ㅋ 강호의 도리를 지키기 위해 ㅈㅍ 던져드림 최근에 플랫폼 옮김ㅋ"),
+            ADULT_RULES);
+    assertThat(result.status()).isEqualTo(DetectionStatus.SPAM);
+    assertThat(result.reasonCodes()).containsAnyOf("SEARCH_CTA", "BROADCAST_ACCIDENT");
+  }
+
+  @Test
+  void adultSpam_dotObfuscatedBroadcastContent_returnsSPAM() {
+    // "전..용..방..송..사..고" → 한글 사이 특수문자 제거 → "전용방송사고" → BROADCAST_ACCIDENT
+    // "구 글에 ... 검색" → SEARCH_CTA
+    var result =
+        engine.detect(
+            new Comment(
+                "구 글에 [성세라 사건] 검색 ㄱㄱ 어린애들은 검색하지마라 ㅡㅡ미드 장단아니더라 인플루언서 VIP 전..용..방..송..사..고나옴ㅋ"),
+            ADULT_RULES);
+    assertThat(result.status()).isEqualTo(DetectionStatus.SPAM);
+    assertThat(result.reasonCodes()).containsAnyOf("SEARCH_CTA", "BROADCAST_ACCIDENT");
+  }
+
+  @Test
+  void adultSpam_childIncidentAndAdultCup_returnsSPAM() {
+    // "이 동 사 건" → "이동사건" → CHILD_INCIDENT
+    // "G컵" → lowercase → "g컵" → ADULT_CUP
+    var result =
+        engine.detect(
+            new Comment(
+                "<성세라 G컵> 꾸 글에 입..력하면 ㅇ ㅏ 이 동 사 건 나옴.ㅋㅋ ㄷㄷㄷ 어린애들은 검색하지 마라 ㅡㅡ미드 장난아니더라"),
+            ADULT_RULES);
+    assertThat(result.status()).isEqualTo(DetectionStatus.SPAM);
+    assertThat(result.reasonCodes()).containsAnyOf("CHILD_INCIDENT", "ADULT_CUP");
+  }
+
+  @Test
+  void adultSpam_falsePositive_reactionComment_SAFE() {
+    // 스팸 댓글에 반응하는 정상 댓글 — 오탐 없어야 함
+    var result = engine.detect(new Comment("아니... 내가 봤던 거네ㅋㅋㅋㅋ"), ADULT_RULES);
+    assertThat(result.status()).isEqualTo(DetectionStatus.SAFE);
+  }
+
   // ── 오탐 방지 (False Positive) ────────────────────────────────────────────
 
   @Test
