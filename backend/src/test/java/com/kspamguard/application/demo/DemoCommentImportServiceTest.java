@@ -16,10 +16,13 @@ import com.kspamguard.application.detection.DetectCommentUseCase;
 import com.kspamguard.application.port.out.CommentPersistencePort;
 import com.kspamguard.application.port.out.DetectionResultPersistencePort;
 import com.kspamguard.application.port.out.ModerationQueuePersistencePort;
+import com.kspamguard.application.port.out.SpamRuleQueryPort;
+import com.kspamguard.application.rule.SpamRuleView;
 import com.kspamguard.domain.detection.DetectionResult;
 import com.kspamguard.domain.detection.DetectionStatus;
 import com.kspamguard.domain.detection.RuleMatch;
 import com.kspamguard.domain.rule.SpamRule;
+import java.time.Instant;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,6 +34,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class DemoCommentImportServiceTest {
 
   @Mock DetectCommentUseCase detectCommentUseCase;
+  @Mock SpamRuleQueryPort spamRuleQueryPort;
   @Mock CommentPersistencePort commentPersistencePort;
   @Mock DetectionResultPersistencePort detectionResultPersistencePort;
   @Mock ModerationQueuePersistencePort moderationQueuePersistencePort;
@@ -40,16 +44,25 @@ class DemoCommentImportServiceTest {
   SpamRule dmRule = SpamRule.regex("DM_LURE", "dm\\s*주세요", 0.45);
   SpamRule couponRule = SpamRule.regex("OBFUSCATED_FREE_COUPON", "무.{0,5}쿠폰", 0.45);
 
+  SpamRuleView dmRuleView =
+      new SpamRuleView(1L, "DM_LURE", "REGEX", "dm\\s*주세요", 0.45, true, Instant.now());
+  SpamRuleView couponRuleView =
+      new SpamRuleView(
+          2L, "OBFUSCATED_FREE_COUPON", "REGEX", "무.{0,5}쿠폰", 0.45, true, Instant.now());
+
   @BeforeEach
   void setUp() {
     lenient()
         .when(
             commentPersistencePort.save(anyString(), anyString(), anyString(), anyString(), any()))
         .thenReturn(1L);
+    lenient()
+        .when(spamRuleQueryPort.findAllEnabled())
+        .thenReturn(List.of(dmRuleView, couponRuleView));
     service =
         new DemoCommentImportService(
             detectCommentUseCase,
-            List.of(dmRule, couponRule),
+            spamRuleQueryPort,
             commentPersistencePort,
             detectionResultPersistencePort,
             moderationQueuePersistencePort);

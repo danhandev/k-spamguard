@@ -5,6 +5,8 @@ import com.kspamguard.application.detection.DetectCommentUseCase;
 import com.kspamguard.application.port.out.CommentPersistencePort;
 import com.kspamguard.application.port.out.DetectionResultPersistencePort;
 import com.kspamguard.application.port.out.ModerationQueuePersistencePort;
+import com.kspamguard.application.port.out.SpamRuleQueryPort;
+import com.kspamguard.application.rule.SpamRuleView;
 import com.kspamguard.domain.detection.DetectionResult;
 import com.kspamguard.domain.detection.DetectionStatus;
 import com.kspamguard.domain.rule.SpamRule;
@@ -17,19 +19,19 @@ import org.springframework.transaction.annotation.Transactional;
 public class DemoCommentImportService implements DemoCommentImportUseCase {
 
   private final DetectCommentUseCase detectCommentUseCase;
-  private final List<SpamRule> defaultRules;
+  private final SpamRuleQueryPort spamRuleQueryPort;
   private final CommentPersistencePort commentPersistencePort;
   private final DetectionResultPersistencePort detectionResultPersistencePort;
   private final ModerationQueuePersistencePort moderationQueuePersistencePort;
 
   public DemoCommentImportService(
       DetectCommentUseCase detectCommentUseCase,
-      List<SpamRule> defaultRules,
+      SpamRuleQueryPort spamRuleQueryPort,
       CommentPersistencePort commentPersistencePort,
       DetectionResultPersistencePort detectionResultPersistencePort,
       ModerationQueuePersistencePort moderationQueuePersistencePort) {
     this.detectCommentUseCase = detectCommentUseCase;
-    this.defaultRules = defaultRules;
+    this.spamRuleQueryPort = spamRuleQueryPort;
     this.commentPersistencePort = commentPersistencePort;
     this.detectionResultPersistencePort = detectionResultPersistencePort;
     this.moderationQueuePersistencePort = moderationQueuePersistencePort;
@@ -38,12 +40,14 @@ public class DemoCommentImportService implements DemoCommentImportUseCase {
   @Override
   @Transactional
   public List<DemoDetectionResult> importAndDetect(List<DemoCommentItem> items) {
-    return items.stream().map(this::analyzeAndPersist).toList();
+    List<SpamRule> rules =
+        spamRuleQueryPort.findAllEnabled().stream().map(this::toSpamRule).toList();
+    return items.stream().map(item -> analyzeAndPersist(item, rules)).toList();
   }
 
-  private DemoDetectionResult analyzeAndPersist(DemoCommentItem item) {
+  private DemoDetectionResult analyzeAndPersist(DemoCommentItem item, List<SpamRule> rules) {
     DetectionResult result =
-        detectCommentUseCase.detect(new DetectCommentCommand(item.text(), defaultRules));
+        detectCommentUseCase.detect(new DetectCommentCommand(item.text(), rules));
 
     int score = (int) Math.round(result.score() * 100);
     Instant now = Instant.now();
@@ -62,5 +66,11 @@ public class DemoCommentImportService implements DemoCommentImportUseCase {
 
     return new DemoDetectionResult(
         item.externalCommentId(), result.status(), score, result.reasonCodes());
+  }
+
+  private SpamRule toSpamRule(SpamRuleView view) {
+    return "REGEX".equals(view.ruleType())
+        ? SpamRule.regex(view.ruleCode(), view.pattern(), view.threshold())
+        : SpamRule.keyword(view.ruleCode(), view.pattern(), view.threshold());
   }
 }
